@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Real POS</title>
+    <link rel="stylesheet" href="css/stylesheet.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.8.1/firebase.js"></script>
+</head>
+<body onload="InitializeApp()">    
+    <menu id="menu" class="hidden">
+        <div id="menu-header">
+            <a href="#dashboard" id="logo" onclick="ChangePage('dashboard')"></a>
+            <a href="#dashboard" id="business-name-primary" onclick="ChangePage('dashboard')">QuickFix Cellular</a>
+            <div id="business-name-secondary">Chandler, AZ</div>
+        </div>
+        
+        <div id="menu-container">
+            <a href="#new-repair" id="new-repair" onclick="ChangePage('new-repair')">
+                <div class="material-symbols-outlined">local_activity</div>
+                <div class="menu-link">New Repair</div>
+            </a>
+            <a href="#open-tickets" id="open-tickets" class="selected" onclick="ChangePage('open-tickets')">
+                <div class="material-symbols-outlined">summarize</div>
+                <div class="menu-link">Open Tickets</div>
+            </a>
+            <a href="#reports" id="reports" onclick="ChangePage('reports')">
+                <div class="material-symbols-outlined">account_balance</div>
+                <div class="menu-link">Reports & Invoices</div>
+            </a>
+            <a href="#pos" id="pos" onclick="ChangePage('pos')">
+                <div class="material-symbols-outlined">price_change</div>
+                <div class="menu-link">POS / Quick Sale</div>
+            </a>
+            <a href="#part-orders" id="part-orders" onclick="ChangePage('part-orders')">
+                <div class="material-symbols-outlined">architecture</div>
+                <div class="menu-link">Part Orders</div>
+            </a>
+            <a href="#settings" id="settings" onclick="ChangePage('settings')">
+                <div class="material-symbols-outlined">settings</div>
+                <div class="menu-link">Settings</div>
+            </a>
+        </div>
+
+        <button onclick="ChangeDarkTheme()">Dark Mode</button>
+    </menu>
+    <main id="main">
+        <div id="mobile-header">
+            <div class="menu-icon" onclick="ToggleMenu()"><div id="menu-button" class="material-symbols-outlined">menu</div></div>
+            <div id="name-icon-container"></div>
+        </div>
+        <div id="search-container">
+            <div class="search-box" style="width: 400px;">
+                <div class="material-symbols-outlined">search</div>
+                <input type="text" placeholder="Search for Customer">
+            </div>
+            <div class="search-box" style="width: 200px;">
+                <input type="text" placeholder="Ticket #">
+            </div>
+        </div>
+        <div id="frame"></div>
+    </main>
+    <div id="click-out" class="hidden" onclick="CloseMenu()"></div>
+    <script type="text/javascript" src="js/basicFunctions.js"></script>
+    
+    <script type="text/javascript" src="js/dashboard.js"></script>
+    <script type="text/javascript" src="js/customer.js"></script>
+    <script type="text/javascript" src="js/dashboard.js"></script>
+    <script type="text/javascript" src="js/newRepair.js"></script>
+    <script type="text/javascript" src="js/openTickets.js"></script>
+    <script type="text/javascript" src="js/partOrders.js"></script>
+    <script type="text/javascript" src="js/pos.js"></script>
+    <script type="text/javascript" src="js/reports.js"></script>
+    <script type="text/javascript" src="js/settings.js"></script>
+    <script type="text/javascript" src="js/ticket.js"></script>
+
+    <script type="text/javascript" src="js/firebaseFunctions.js"></script>
+</body>
+</html>
