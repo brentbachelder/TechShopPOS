@@ -32,7 +32,7 @@ function UpdateCustomerList(snapshot) {
     Customers = snapshot;
     TicketSearch = [];
     for(var key in Customers) {
-        Customers[key] = {"Name" : Customers[key].Name, "Phone" : Customers[key].Phone };
+        CustomerSearch[key] = {"Name" : Customers[key].Name, "Phone" : Customers[key].Phone };
         for(var ticket in Customers[key].Tickets) {
             TicketSearch.push(ticket);
         }
@@ -48,4 +48,6 @@ db.ref("OpenTickets").on('value', function (snap) {
 // On value change listener for Settings
 db.ref("Settings").on('value', function (snap) {
     Settings = snap.val();
+    document.getElementById("business-name-primary").innerHTML = Settings.General.BusinessName;
+    document.getElementById("business-name-secondary").innerHTML = Settings.General.City + ", " + Settings.General.State;
 });

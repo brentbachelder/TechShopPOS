@@ -1,82 +1,70 @@
-var ticketsInProgress = {};
-
 function InitOpenTickets() {
+    document.getElementById("page-title").innerHTML = "OPEN TICKETS";
+    document.getElementById("mobile-page-title").innerHTML = "OPEN TICKETS";
     DrawOpenTickets();
     UpdateOpenTicketsList();
 }
 
-function UpdateOpenTicketsList() {
-    var content = ``;
-    // Clear Previous ticketsInProgress object then re-populate
-    ticketsInProgress = {};
-    for(var ticketNum in OpenTickets) GetIndividualTicket(ticketNum); // OpenTickets variable is set in the Firebase call
-    console.log(ticketsInProgress);
+async function UpdateOpenTicketsList() {
+    var ticketsInProgress = {};
+    var currentlyUsedStatuses = [];
+
+    for(var ticketNum in OpenTickets) {
+        await db.ref("Tickets").child(ticketNum).once('value').then(snap => { 
+            var ticketResponse = snap.val();
+            if(!currentlyUsedStatuses.includes(ticketResponse.Status)) currentlyUsedStatuses.push(ticketResponse.Status);
+
+            var repairDescription = GetRepairDescription(ticketResponse);
+            var data = { "Name" : Customers[ticketResponse.Customer].Name, "Status" : ticketResponse.Status, "DateCreated" : 
+                ticketResponse.DateCreated, "Description" : repairDescription };
+            ticketsInProgress[ticketNum] = data;
+        });
+    }
+    CreateStatusParents(currentlyUsedStatuses);
+    DrawIndividualOpenTickets(ticketsInProgress);
 }
 
-function GetIndividualTicket(ticketNum) {
-    db.ref("Tickets").child(ticketNum).once('value').then(snap => { 
-        var ticketResponse = snap.val();
-        var repairDescription = GetRepairDescription(ticketResponse);
-        ticketsInProgress[ticketNum] = { "Name" : Customers[ticketResponse.Customer].Name, "Status" : ticketResponse.Status, "DateCreated" : 
-            ticketResponse.DateCreated, "Description" : repairDescription };
-    });
+function CreateStatusParents(statuses) {
+    var content = '';
+    statuses = statuses.sort();
+    for(var i = 0; i < statuses.length; i++) {
+        content += `
+            <div class="object large">
+                <h1>${statuses[i].toUpperCase()}</h1>
+                <div id="${statuses[i]}" class="info-container">
+                </div>
+            </div>
+        `;
+    }
+    document.getElementById("open-ticket-container").innerHTML = content;
 }
 
-function StatusDropdown() {
-    /*<div class="selectdiv">
-        <label>
-            <select onchange="dashboardChangeStatus(${ticketsWithStatus[i]}, this.value)">`;
-                for(var status in settings.Tickets.Status) {
-                    if(settings.Tickets.Status[status].Display != '') {
-                        if(status == key) content += `<option value="${settings.Tickets.Status[status].Display}" selected>
-                            ${settings.Tickets.Status[status].Display}&nbsp;&nbsp;&nbsp;</option>`;
-                        else content += `<option value="${settings.Tickets.Status[status].Display}">
-                            ${settings.Tickets.Status[status].Display}&nbsp;&nbsp;&nbsp;</option>`;
-                    }
-                }
-            content += `</select>
-        </label>
-    </div>*/
+function DrawIndividualOpenTickets(ticketsInProgress) {
+    for(var key in ticketsInProgress) {
+        var dropdown = StatusDropdown(key, ticketsInProgress[key].Status);
+        var date = DateToText(ticketsInProgress[key].DateCreated);
+        var content = `
+            <div class="open-ticket-container">
+                <a href="#ticket" class="ticket-num">#${key}</a>
+                <a href="#ticket" class="name-device">
+                    <div class="name">${ticketsInProgress[key].Name}</div>
+                    <div class="device">${ticketsInProgress[key].Description}</div>
+                </a>
+                ${dropdown}
+                <a href="#ticket" class="clock-date">
+                    <div class="material-symbols-outlined">update</div>
+                    <div class="date">${date}</div>
+                </a>
+            </div>
+        `;
+        document.getElementById(ticketsInProgress[key].Status).innerHTML += content;
+    }
 }
-
-
-
-
-
-
-
-
-
-
 
 function DrawOpenTickets() {
     var content = `
     
-        <div class="container">
-            <div class="object large" style="height: 160px;">
-                <h1>IN PROGRESS</h1>
-                <div id="in-progress" class="info-container">
-                    <div class="open-ticket-container">
-                        <a href="#ticket" class="ticket-num">#382838</a>
-                        <a href="#ticket" class="name-device">
-                            <div class="name">Brent Bachelder</div>
-                            <div class="device">iPhone 7 Plus - Charging Port</div>
-                        </a>
-                        <div class="selectdiv">
-                            <label>
-                                <select>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Something" selected>Something else</option>
-                                </select>
-                            </label>
-                        </div>
-                        <a href="#ticket" class="clock-date">
-                            <div class="material-symbols-outlined">update</div>
-                            <div class="date">4 Hours Ago</div>
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <div id="open-ticket-container" class="container">
         </div>
     
     `;

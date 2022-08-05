@@ -1,4 +1,6 @@
-function InitSettings() {
+var subpage = '';
+function InitSettings(page) {
+    subpage = page;
     DrawSettings();
 }
 
@@ -20,7 +22,7 @@ function InitSettings() {
 function DrawSettings() {
     var content = `
     
-        Settings
+        Settings - ${subpage};
     
     `;
     $("#frame").html(content);

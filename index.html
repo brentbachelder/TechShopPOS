@@ -39,34 +39,78 @@
                 <div class="material-symbols-outlined">architecture</div>
                 <div class="menu-link">Part Orders</div>
             </a>
-            <a href="#settings" id="settings" onclick="ChangePage('settings')">
+            <a id="settings" onclick="OpenSettings()">
                 <div class="material-symbols-outlined">settings</div>
-                <div class="menu-link">Settings</div>
+                <div class="menu-link">Settings&nbsp;&nbsp;&nbsp;<div class="material-symbols-outlined hidden" id="settings-arrow">arrow_drop_down</div></div>
             </a>
+            <div id="menu-settings" class="hidden">
+                <a href="#settings-general" id="settings-general" onclick="ChangePage('settings-general')">
+                    <div class="menu-link">General</div>
+                </a>
+                <a href="#settings-customers" id="settings-customers" onclick="ChangePage('settings-customers')">
+                    <div class="menu-link">Customers</div>
+                </a>
+                <a href="#settings-tickets" id="settings-tickets" onclick="ChangePage('settings-tickets')">
+                    <div class="menu-link">Tickets</div>
+                </a>
+                <a href="#settings-dual" id="settings-dual" onclick="ChangePage('settings-dual')">
+                    <div class="menu-link">Dual Screen</div>
+                </a>
+            </div>
         </div>
-
-        <button onclick="ChangeDarkTheme()">Dark Mode</button>
     </menu>
     <main id="main">
         <div id="mobile-header">
-            <div class="menu-icon" onclick="ToggleMenu()"><div id="menu-button" class="material-symbols-outlined">menu</div></div>
-            <div id="name-icon-container"></div>
-        </div>
-        <div id="search-container">
-            <div class="search-box" style="width: 400px;">
-                <div class="material-symbols-outlined">search</div>
-                <input type="text" placeholder="Search for Customer">
+            <div class="icon-box mobile" onclick="ToggleMenu()"><div id="menu-button" class="material-symbols-outlined mobile">menu</div></div>
+            <div id="mobile-name-icon-container">
+                <div id="mobile-page-title"></div>
+                <div class="icon-container">
+                    <div class="icon-box mobile" onclick="OpenSearch()"><div class="material-symbols-outlined mobile">search</div></div>
+                    <div class="icon-box mobile" onclick="OpenSearch(true)"><div class="material-symbols-outlined mobile">local_activity</div></div>
+                    <div class="icon-box mobile" onclick="ChangeDarkTheme()"><div id="dark-mode-switch-mobile" class="material-symbols-outlined mobile" >toggle_off</div></div>
+                </div>
             </div>
-            <div class="search-box" style="width: 200px;">
-                <input type="text" placeholder="Ticket #">
+            <div id="dropdown-icon-container" class="hidden">
+                <div id="dropdown-dots" class="icon-box mobile" onclick="OpenDropdownIcons()"><div class="material-symbols-outlined mobile">more_horiz</div></div>
+                <div class="icon-box mobile" onclick="OpenSearch()"><div class="material-symbols-outlined mobile">search</div></div>
+                <div class="icon-box mobile" onclick="OpenSearch(true)"><div class="material-symbols-outlined mobile">local_activity</div></div>
+                <div class="icon-box mobile" onclick="ChangeDarkTheme()"><div id="dark-mode-switch-mobile-dropdown" class="material-symbols-outlined mobile" >toggle_off</div></div>
+            </div>
+        </div>
+        <div id="desktop-header">
+            <div id="page-title">Dashboard</div>
+            <div class="icon-container">
+                <div class="icon-box" onclick="OpenSearch()"><div class="material-symbols-outlined">search</div></div>
+                <div class="icon-box" onclick="OpenSearch(true)"><div class="material-symbols-outlined">local_activity</div></div>
+                <div class="icon-box" onclick="ChangeDarkTheme()"><div id="dark-mode-switch" class="material-symbols-outlined" >toggle_off</div></div>
             </div>
         </div>
         <div id="frame"></div>
     </main>
+    <div id="search-customer-page" class="hidden" onclick="ClickToCloseSearch(event)">
+        <div id="x-out" class="material-symbols-outlined">close</div>
+        <div id="search-customer-container" class="goto-container hidden">
+            <div class="header">SEARCH FOR CUSTOMER</div>
+            <div class="search-container">
+                <div class="material-symbols-outlined">search</div>
+                <input id="customer-input" placeholder="Name or Phone #" onkeydown="SearchKeyboardActions(event)" onkeyup="IsShiftHeld(event); SearchForCustomer(event)">
+            </div>
+            <div id="search-results" onmouseleave="ClearSearchSelection()"></div>
+        </div>
+        <div id="goto-ticket-container" class="goto-container hidden">
+            <div class="header">ENTER TICKET #</div>
+            <div class="search-container">
+                <div class="material-symbols-outlined">search</div>
+                <input id="ticket-input" type="number" placeholder="123456" onkeyup="TicketKeyboardActions(event)">
+            </div>
+            <div id="no-ticket-found" class="hidden">TICKET NOT FOUND</div>
+        </div>
+    </div>
     <div id="click-out" class="hidden" onclick="CloseMenu()"></div>
     <script type="text/javascript" src="js/basicFunctions.js"></script>
     
     <script type="text/javascript" src="js/dashboard.js"></script>
+    <script type="text/javascript" src="js/search.js"></script>
     <script type="text/javascript" src="js/customer.js"></script>
     <script type="text/javascript" src="js/dashboard.js"></script>
     <script type="text/javascript" src="js/newRepair.js"></script>
