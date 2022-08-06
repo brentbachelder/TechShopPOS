@@ -90,7 +90,7 @@
     <div id="search-customer-page" class="hidden" onclick="ClickToCloseSearch(event)">
         <div id="x-out" class="material-symbols-outlined">close</div>
         <div id="search-customer-container" class="goto-container hidden">
-            <div class="header">SEARCH FOR CUSTOMER</div>
+            <div class="search-header">SEARCH FOR CUSTOMER</div>
             <div class="search-container">
                 <div class="material-symbols-outlined">search</div>
                 <input id="customer-input" placeholder="Name or Phone #" onkeydown="SearchKeyboardActions(event)" onkeyup="IsShiftHeld(event); SearchForCustomer(event)">
@@ -98,7 +98,7 @@
             <div id="search-results" onmouseleave="ClearSearchSelection()"></div>
         </div>
         <div id="goto-ticket-container" class="goto-container hidden">
-            <div class="header">ENTER TICKET #</div>
+            <div class="search-header">ENTER TICKET #</div>
             <div class="search-container">
                 <div class="material-symbols-outlined">search</div>
                 <input id="ticket-input" type="number" placeholder="123456" onkeyup="TicketKeyboardActions(event)">

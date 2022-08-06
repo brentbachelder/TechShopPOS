@@ -30,7 +30,10 @@ function CreateStatusParents(statuses) {
     for(var i = 0; i < statuses.length; i++) {
         content += `
             <div class="object large">
-                <h1>${statuses[i].toUpperCase()}</h1>
+                <header class="gray">
+                    <h1>${statuses[i].toUpperCase()}</h1>
+                    <div class="icon-box"><div class="material-symbols-outlined">menu</div></div>
+                </header>
                 <div id="${statuses[i]}" class="info-container">
                 </div>
             </div>
