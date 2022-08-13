@@ -1,6 +1,8 @@
 var searchSelection = -1;
+var searchSelectionNT = -1
 var shiftBeingHeld = false;
 var customerShown = [];
+var customerShownNT = [];
 
 // Open and close Search Page
 function ClickToCloseSearch(event) {
@@ -169,3 +171,98 @@ function OpenTicketPageFromSearch(num) {
     CloseSearch();
     console.log("Goint to ticket page " + num);
 }
+
+
+
+
+
+
+
+// NEW TICKET CUSTOMER SEARCH
+// Create and Draw the customer list
+function SearchForCustomerNT(event) {
+    if(event.keyCode != 40 && event.keyCode != 38 && event.keyCode != 27 && event.keyCode != 13) {
+        var currentInput = document.getElementById(nameInputId).value.toLowerCase();
+        currentInput = currentInput.replace(/[^A-Z0-9]/ig, "");
+        var list = {};
+        var listCount = 0;
+
+        if(currentInput.length > 0) { // Change to 2 after testing
+            for(var key in CustomerSearch) {
+                var name = CustomerSearch[key].Name.toLowerCase();
+                name = name.replace(/[^A-Z0-9]/ig, "");
+                if(name.indexOf(currentInput) != -1 && listCount < 4) {
+                    list[key] = CustomerSearch[key];
+                    listCount++;
+                }
+            }
+            CreateCustomerListNT(list);
+        }
+        else document.getElementById(nameInputId).innerHTML = '';
+    }
+}
+
+function CreateCustomerListNT(list) {
+    customerShownNT = [];
+    document.getElementById("new-ticket-search-results").innerHTML = '';
+    var content = '';
+    var i = 0;
+    for(var key in list) {
+        var selected = '';
+        if(i == searchSelectionNT) selected = ' selected';
+        content += `
+        <div id="nts-${i}" class="new-ticket-search-result${selected}" onmouseenter="SetSearchSelectionNT(${i})" onmousedown="SelectNewTicketCustomer(${key})">${list[key].Name}</div>
+        `;
+        customerShownNT[i] = key;
+        i++;
+    }
+    document.getElementById('new-ticket-search-results').innerHTML = content;
+}
+
+// Search keyboard functions
+function SearchKeyboardActionsNT(event) {
+    if(customerShownNT.length > 0) {
+        var key = event.keyCode;
+        if(key == 40) {
+            event.preventDefault();
+            if(searchSelectionNT == -1 || searchSelectionNT == customerShownNT.length) searchSelectionNT = 0;
+            else searchSelectionNT += 1;
+        }
+        else if(key == 38) {
+            event.preventDefault();
+            if(searchSelectionNT == -1 || searchSelectionNT == customerShownNT.length) searchSelectionNT = customerShownNT.length - 1;
+            else searchSelectionNT -= 1;
+        }
+        else if(key == 27) {
+            CloseSearchNT();
+            return;
+        }
+        else if(key == 13) {
+            if(searchSelectionNT >= 0 && searchSelectionNT <= customerShownNT.length) {
+                SelectNewTicketCustomer(customerShownNT[searchSelectionNT]);
+                document.getElementById(nameInputId).blur();
+            }
+        }
+        else searchSelectionNT = -1;
+        SetSearchSelectionNT(searchSelectionNT);
+    }
+}
+
+// Set, Clear, and Close the search results
+function SetSearchSelectionNT(num) {
+    searchSelectionNT = num;
+    ClearSearchSelectionNT();
+    if(num < customerShownNT.length && num >= 0) document.getElementById("nts-" + num).classList.add("selected");
+}
+
+function ClearSearchSelectionNT() {
+    var results = document.getElementById("new-ticket-search-results").getElementsByClassName("new-ticket-search-result");
+    for(var i = 0; i < results.length; i++) results[i].classList.remove("selected");
+}
+
+function CloseSearchNT() {
+    searchSelectionNT = -1;
+    ClearSearchSelectionNT();
+    document.getElementById("new-ticket-search-results").innerHTML = '';
+}
+

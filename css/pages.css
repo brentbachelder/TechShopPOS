@@ -1,0 +1,97 @@
+/* || OPEN TICKETS ||
+/*  Statuses  */
+.open-ticket-container { width: 100%; border-bottom: 1px solid var(--description); display: flex; justify-content: flex-start; align-items: center; font-size: 14px; 
+    font-weight: 700; padding: var(--inner-padding); }
+.open-ticket-container:last-child { border-bottom: 0; border-radius: 0 0 var(--border-radius) var(--border-radius); }
+.object .info-container { display: flex; flex-direction: column; }
+.open-ticket-container .ticket-num {  color: var(--default); width: 86px; height: 100%; display: flex; align-items: center; }
+.open-ticket-container .name-device { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+.open-ticket-container .name-device > .name { color: var(--default); }
+.open-ticket-container .name-device > .device { font-size: 12px; font-weight: 400; color: var(--description); }
+.open-ticket-container .clock-date { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 14px; width: 80px; height: 100%; }
+.open-ticket-container .clock-date > .material-symbols-outlined { font-size: 18px; color: var(--description); }
+.open-ticket-container .clock-date > .date { font-size: 10px; font-weight: 400; color: var(--description); }
+
+@media (max-width: 450px) { 
+    .open-ticket-container .clock-date { display: none; }
+}
+@media (max-width: 600px) { 
+    .open-ticket-container .selectdiv { display: none; }
+}
+@media (hover:hover) {
+    .open-ticket-container:hover { background-color: var(--hover);  }
+}
+
+
+
+
+/* || NEW REPAIR ||
+/*  Colors   */
+body { --input-border: #cfd2d6; --input-background: #f0f0f0; --input-placeholder: #828282; --input-blue: #3d52a8; --input-red: #a34e47; --submit-hover: #eeeeee; }
+/*body.dark-theme { --input-placeholder: purple; --input-blue: #3d52a8; }*/
+
+/*  Outline */
+#input-customer-container, #input-device-container { display: flex; flex-wrap: wrap; padding: var(--inner-padding); gap: var(--inner-padding); justify-content: center; }
+.new-ticket-submit-button { width: 300px; height: 80px; font-size: 16px; font-weight: 500; background-color: var(--background); border: 2px solid var(--select); }
+.new-ticket-submit-button:hover { background-color: var(--submit-hover);}
+
+/*  Customer Information  */
+.input-shell { width: 100%; min-width: 100%; max-height: 52px; }
+.input-container { width: 100%; height: 52px; padding: 0 var(--inner-padding); border: 2px solid var(--input-border); 
+    border-radius: var(--border-radius); background-color: var(--input-background); display: flex; align-items: center; }
+.input-container:focus-within { border: 2px solid var(--input-blue); color: var(--input-blue); background-color: var(--background); }
+.input-container.error { border: 2px solid var(--input-red); color: var(--input-red); }
+.input-container input { font-size: 16px; }
+.input-container:focus-within > .x-input { width: 40px; }
+.miniput { width: 100%;  }
+.miniput-description { font-size: 10px; font-weight: 500; height: 0; transition-duration: .2s; overflow: hidden; white-space: nowrap; }
+.input-container:focus-within .miniput-description, .input-container.error .miniput-description { height: 14px; }
+.x-input { width: 0; height: 40px; display: flex; justify-content:center; align-items:center; overflow: hidden; white-space: nowrap; transition-duration: .2s }
+#new-ticket-search-results { background-color: var(--background); width: 100%; position: relative; border-radius: var(--border-radius); 
+    box-shadow: 0px 1px 4px var(--shadow);  }
+.new-ticket-search-result { height: 35px; width: 100%; padding-left: var(--inner-padding); display: flex; align-items: center; font-size: 14px; }
+.new-ticket-search-result.selected { background-color: var(--hover); cursor: pointer; }
+
+/*  Device Information  */
+.device-outline { width: 100%; display: flex; flex-wrap: wrap; min-height: 150px; align-content: flex-start; }
+#new-repair-summary { width: 100%; padding: var(--inner-padding); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--hover);
+    padding: var(--inner-padding); flex-wrap: wrap; color: var(--default); }
+#new-repair-summary.error { background-color: var(--input-red); }
+.input-object { display: flex; width: 100%; gap: var(--inner-padding); flex-wrap: wrap; padding: var(--inner-padding); justify-content: center; }
+.input-object.hidden, #new-repair-summary.hidden, #new-ticket-checkboxes.hidden, #repair-information-error.hidden { display: none; }
+#input-repair-other { flex-direction: column; align-items: center; justify-content: flex-start; gap: 0; }
+.other-device-input-container { margin: 0 8px; }
+.other-device-header { font-size: 12px; font-weight: 700; width: calc(316px - var(--border-radius)); text-align: left; margin-bottom: 4px; }
+.other-device-header.small { width: 150px; margin-left: var(--border-radius); }
+.other-device-input { width: 316px; height: 48px; font-size: 14px; background-color: var(--background); border: 2px solid var(--select); 
+    border-radius: var(--border-radius); padding: 0 var(--inner-padding); text-align: left; margin-bottom: var(--inner-padding); }
+.other-device-input.small { width: 150px; height: 36px; }
+.other-device-input:placeholder-shown { background-color: var(--input-background); }
+.other-device-input:focus { background-color: var(--background); }
+.other-device-input-container.error .other-device-header { color: var(--input-red); }
+.other-device-input-container.error .other-device-input { border-color: var(--input-red); }
+#input-repair-type { gap: 8px; justify-content: flex-start; }
+button.device { width: 150px; height: 48px; font-size: 14px; font-weight: 400; background-color: var(--input-background); border-color: var(--input-border); 
+    border-radius: var(--border-radius); padding: 0; }
+button.type { width: 150px; background-color: transparent; border: 0; height: 40px; padding: 0 8px; overflow: hidden; white-space: nowrap; text-align: left; font-weight: 500; }
+#input-repair-repairs button { text-align: center; border: 1px solid var(--select); }
+#input-repair-repairs button.selected { background-color: var(--select); }
+#input-repair-repairs input { width: 316px; height: 40px; border: 2px solid var(--select); font-size: 14px; padding: 0 12px; text-align: center;
+    background-color: var(--select); font-weight: 500; }
+#input-repair-repairs input:placeholder-shown { background-color: var(--input-background); border: 2px solid var(--input-border); }
+#input-repair-repairs input:focus { background-color: var(--background); }
+#new-ticket-checkboxes, #new-ticket-custom-inputs { border-top: 1px solid var(--hover); }
+#new-ticket-custom-inputs { gap: 0; }
+#repair-information-error { color: var(--input-red); padding-left: 8px; }
+
+
+@media (min-width: 500px) {
+    .input-shell { width: calc(50% - (var(--inner-padding) / 2)); min-width: 250px; }
+}
+@media (min-width: 1600px) {
+    .object.large.nr { width: calc(50% - var(--outer-padding) / 2); height: auto; }
+}
+@media (hover:hover) {
+    .x-input:hover { background-color: var(--hover); cursor: pointer; }
+    button.type:hover, button.device:hover { background-color: var(--hover); }
+}

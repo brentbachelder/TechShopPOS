@@ -5,7 +5,7 @@ var finishedLoading = false;
 var postLoadingPage = "";
 
 // Object variables for database information
-var Customers = {}, CustomerSearch = {}, TicketSearch = [], OpenTickets = {}, Settings = {};
+var Customers = {}, CustomerSearch = {}, TicketSearch = [], OpenTickets = {}, Settings = {}, Admin = {}, Prices = {};
 
 // Initialize the App
 function InitializeApp() {
@@ -45,9 +45,19 @@ db.ref("OpenTickets").on('value', function (snap) {
     if(currentPage == "open-tickets") UpdateOpenTicketsList();
 });
 
+// On value change listener for Prices
+db.ref("Prices").on('value', function (snap) {
+    Prices = snap.val();
+});
+
 // On value change listener for Settings
 db.ref("Settings").on('value', function (snap) {
     Settings = snap.val();
     document.getElementById("business-name-primary").innerHTML = Settings.General.BusinessName;
     document.getElementById("business-name-secondary").innerHTML = Settings.General.City + ", " + Settings.General.State;
+});
+
+// On value change listener for Admin
+db.ref("Admin").on('value', function (snap) {
+    Admin = snap.val();
 });

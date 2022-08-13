@@ -30,6 +30,8 @@ function DrawPartOrders() {
             <div class="object small" style="height: 200px;"></div>
             <div class="object small" style="height: 200px;"></div>
             <div class="object small" style="height: 200px;"></div>
+            <div class="object large" style="height: 200px;"></div>
+            <div class="object large" style="height: 200px;"></div>
         </div>
     
     `;

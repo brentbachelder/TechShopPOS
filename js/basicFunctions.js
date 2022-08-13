@@ -120,6 +120,10 @@ function OpenSettings() {
     document.getElementById("settings-arrow").classList.toggle("hidden");
 }
 
+function CheckboxToggle(element) {
+    element.classList.toggle("selected");
+}
+
 
 
 // Get Repair Description (Brand Model - Repair, Repair)
