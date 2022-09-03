@@ -1,7 +1,6 @@
 function InitOpenTickets() {
     document.getElementById("page-title").innerHTML = "OPEN TICKETS";
     document.getElementById("mobile-page-title").innerHTML = "OPEN TICKETS";
-    DrawOpenTickets();
     UpdateOpenTicketsList();
 }
 
@@ -20,6 +19,7 @@ async function UpdateOpenTicketsList() {
             ticketsInProgress[ticketNum] = data;
         });
     }
+    DrawOpenTickets();
     CreateStatusParents(currentlyUsedStatuses);
     DrawIndividualOpenTickets(ticketsInProgress);
 }
@@ -32,7 +32,7 @@ function CreateStatusParents(statuses) {
             <div class="object large">
                 <header class="gray">
                     <h1>${statuses[i].toUpperCase()}</h1>
-                    <div class="icon-box"><div class="material-symbols-outlined">menu</div></div>
+                    <button class="icon-box"><div class="material-symbols-outlined">expand_more</div></button>
                 </header>
                 <div id="${statuses[i]}" class="info-container">
                 </div>
@@ -48,13 +48,13 @@ function DrawIndividualOpenTickets(ticketsInProgress) {
         var date = DateToText(ticketsInProgress[key].DateCreated);
         var content = `
             <div class="open-ticket-container">
-                <a href="#ticket" class="ticket-num">#${key}</a>
-                <a href="#ticket" class="name-device">
+                <a href="#ticket-${key}" class="ticket-num">#${key}</a>
+                <a href="#ticket-${key}" class="name-device">
                     <div class="name">${ticketsInProgress[key].Name}</div>
                     <div class="device">${ticketsInProgress[key].Description}</div>
                 </a>
                 ${dropdown}
-                <a href="#ticket" class="clock-date">
+                <a href="#ticket-${key}" class="clock-date">
                     <div class="material-symbols-outlined">update</div>
                     <div class="date">${date}</div>
                 </a>
@@ -67,7 +67,16 @@ function DrawIndividualOpenTickets(ticketsInProgress) {
 function DrawOpenTickets() {
     var content = `
     
-        <div id="open-ticket-container" class="container">
+        <div id="open-ticket-top" class="object large">
+            <header class="green">
+                <div class="info"><b>Open Tickets: </b>${Object.keys(OpenTickets).length}</div>
+                <div id="todays-sales" class="info"><b>Today's Sales: </b>$1202</div>
+            </header>
+        </div>
+        <div id="open-ticket-container" class="container"></div>
+        <div id="open-ticket-side" class="object small" style="background-color: transparent; box-shadow: none;">
+            <div class="open-ticket-info"><div><b>Open Tickets</b></div><div style="font-size: 24px;">${Object.keys(OpenTickets).length}</div></div>
+            <div class="open-ticket-info"><div><b>Today's Sales</b></div><div style="font-size: 24px;">$1202</div></div>
         </div>
     
     `;

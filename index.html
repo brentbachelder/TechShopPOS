@@ -16,16 +16,16 @@
     <menu id="menu" class="hidden">
         <div id="menu-header">
             <a href="#dashboard" id="logo" onclick="ChangePage('dashboard')"></a>
-            <a href="#dashboard" id="business-name-primary" onclick="ChangePage('dashboard')">QuickFix Cellular</a>
-            <div id="business-name-secondary">Chandler, AZ</div>
+            <a href="#dashboard" id="business-name-primary" onclick="ChangePage('dashboard')"></a>
+            <div id="business-name-secondary"></div>
         </div>
         
         <div id="menu-container">
-            <a href="#new-repair" id="new-repair" onclick="ChangePage('new-repair')">
+            <a href="#new-repair" id="new-repair" onclick="ClearTemporary(); ChangePage('new-repair')">
                 <div class="material-symbols-outlined">local_activity</div>
                 <div class="menu-link">New Repair</div>
             </a>
-            <a href="#open-tickets" id="open-tickets" class="selected" onclick="ChangePage('open-tickets')">
+            <a href="#open-tickets" id="open-tickets" onclick="ChangePage('open-tickets')">
                 <div class="material-symbols-outlined">summarize</div>
                 <div class="menu-link">Open Tickets</div>
             </a>
@@ -41,10 +41,10 @@
                 <div class="material-symbols-outlined">architecture</div>
                 <div class="menu-link">Part Orders</div>
             </a>
-            <a id="settings" onclick="OpenSettings()">
+            <button id="settings" onclick="OpenSettings()">
                 <div class="material-symbols-outlined">settings</div>
                 <div class="menu-link">Settings&nbsp;&nbsp;&nbsp;<div class="material-symbols-outlined hidden" id="settings-arrow">arrow_drop_down</div></div>
-            </a>
+            </button>
             <div id="menu-settings" class="hidden">
                 <a href="#settings-general" id="settings-general" onclick="ChangePage('settings-general')">
                     <div class="menu-link">General</div>

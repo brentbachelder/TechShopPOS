@@ -2,6 +2,7 @@
 var currentPage;
 const pageList = ["new-repair", "open-tickets", "reports", "pos", "part-orders", "settings-general", "settings-customers", "settings-tickets", "settings-dual"];
 const menu = document.getElementById("menu");
+const customerRatingColor = ['', 'red', 'lightcoral', 'gray', 'lightgreen', 'green'];
 
 
 // Listener for page changes
@@ -25,18 +26,24 @@ function ClickFunctions(event) {
 
 
 // Actual Page Change function
-function ChangePage(newPage, pageID = null) {
+function ChangePage(newPage) {
     if(finishedLoading) {
         if(newPage != currentPage) {
             CloseMenu();
 
-            if(newPage == "customer") InitCustomer("12345");
-            else if(newPage == "new-repair") InitNewRepair();
+            if(newPage == "new-repair") InitNewRepair();
             else if(newPage == "open-tickets") InitOpenTickets();
             else if(newPage == "part-orders") InitPartOrders();
             else if(newPage == "pos") InitPos();
             else if(newPage == "reports") InitReports();
-            else if(newPage == "ticket") InitTicket("12345");
+            else if(newPage.includes("customer"))  {
+                var pageID = newPage.split('-')[1];
+                InitCustomer(pageID);
+            }
+            else if(newPage.includes("ticket"))  {
+                var pageID = newPage.split('-')[1];
+                InitTicket(pageID);
+            }
             else if(newPage.includes("settings")) {
                 if(document.getElementById("menu-settings").classList.contains("hidden")) {
                     document.getElementById("menu-settings").classList.remove("hidden");
@@ -120,24 +127,42 @@ function OpenSettings() {
     document.getElementById("settings-arrow").classList.toggle("hidden");
 }
 
-function CheckboxToggle(element) {
+function CheckboxToggle(element, fromNewTicket = false) {
     element.classList.toggle("selected");
+    if(fromNewTicket)  {
+        if(element.classList.contains("selected")) TemporaryNewTicketCheckboxes.push(element.id);
+        else {
+            for( var i = 0; i < TemporaryNewTicketCheckboxes.length; i++){ 
+                if(TemporaryNewTicketCheckboxes[i] == element.id) TemporaryNewTicketCheckboxes.splice(i, 1); 
+            }
+        }
+    }
+}
+
+
+
+// Enter key blurs input
+function OnEnterBlur(event) {
+    var key = event.keyCode;
+    if(key == 13) document.activeElement.blur();
 }
 
 
 
 // Get Repair Description (Brand Model - Repair, Repair)
 function GetRepairDescription(ticketObject) {
-    var description = ticketObject.Device + ' ' + ticketObject.Model + ' - ';
+    var description = ticketObject.Device + ' ' + ticketObject.Type + ' - ';
 
     var line = '';
-    var length = Object.keys(ticketObject.Repairs).length;
-    var counter = 0;
-    for(var i in ticketObject.Repairs) {
-        if(length > counter + 2) line += ticketObject.Repairs[i].Display + ', ';
-        else if(length > counter + 1) line += ticketObject.Repairs[i].Display + ' & ';
-        else line += ticketObject.Repairs[i].Display;
-        counter++;
+    if('Repairs' in ticketObject) {
+        var length = Object.keys(ticketObject.Repairs).length;
+        var counter = 0;
+        for(var i in ticketObject.Repairs) {
+            if(length > counter + 2) line += ticketObject.Repairs[i].Display + ', ';
+            else if(length > counter + 1) line += ticketObject.Repairs[i].Display + ' & ';
+            else line += ticketObject.Repairs[i].Display;
+            counter++;
+        }
     }
     
     description += line;
@@ -162,6 +187,7 @@ function DateConvert() {
 }
 
 function DateToText(date) {
+    date = date.toString();
     var year = date.substring(0,4);
     var month = date.substring(4,6);
     var day = date.substring(6, 8);
@@ -174,7 +200,6 @@ function DateToText(date) {
     var description = difference + " days";
     if(difference < 2) {
         var minutes = Math.floor((today - original) / (1000 * 60));
-        console.log(minutes);
         if(minutes > 1440) description = "Yesterday";
         else if(minutes < 1) description = "Just now";
         else if(minutes == 1) description = "A minute ago";

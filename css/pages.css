@@ -5,18 +5,38 @@
 .open-ticket-container:last-child { border-bottom: 0; border-radius: 0 0 var(--border-radius) var(--border-radius); }
 .object .info-container { display: flex; flex-direction: column; }
 .open-ticket-container .ticket-num {  color: var(--default); width: 86px; height: 100%; display: flex; align-items: center; }
-.open-ticket-container .name-device { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+.open-ticket-container .name-device { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; white-space: nowrap; }
 .open-ticket-container .name-device > .name { color: var(--default); }
-.open-ticket-container .name-device > .device { font-size: 12px; font-weight: 400; color: var(--description); }
+.open-ticket-container .name-device > .device { font-size: 12px; font-weight: 400; color: var(--description); overflow: hidden; white-space: nowrap; }
 .open-ticket-container .clock-date { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 14px; width: 80px; height: 100%; }
 .open-ticket-container .clock-date > .material-symbols-outlined { font-size: 18px; color: var(--description); }
 .open-ticket-container .clock-date > .date { font-size: 10px; font-weight: 400; color: var(--description); }
 
+/*  Top & Side Info */
+#open-ticket-top { width: 100%; margin-top: var(--outer-padding); }
+#open-ticket-side { display: none; } 
+#open-ticket-top header { display: flex; width: 100%; justify-content: space-evenly; align-items: center;}
+#open-ticket-top .info { padding: var(--inner-padding); font-size: 18px; font-weight: 500; color: var(--default); }
+.open-ticket-info { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 150px; background-color: #c1d9bf;
+    margin-bottom: var(--outer-padding); border-radius: var(--border-radius); gap: var(--inner-padding); box-shadow: 0 1px 4px var(--shadow); }
+
 @media (max-width: 450px) { 
     .open-ticket-container .clock-date { display: none; }
+    #todays-sales { display: none; }
 }
 @media (max-width: 600px) { 
     .open-ticket-container .selectdiv { display: none; }
+}
+@media (min-width: 700px) {
+    #open-ticket-top { width: calc(100% - var(--outer-padding) - var(--outer-padding)); margin: var(--outer-padding) 0 0 var(--outer-padding); }
+}
+@media (min-width: 1000px) {
+    #open-ticket-top { margin-bottom: var(--outer-padding); }
+}
+@media (min-width: 1600px) {
+    #open-ticket-container { width: calc(75% - var(--outer-padding) / 2); }
+    #open-ticket-side { display: flex; }
+    #open-ticket-top { display: none; }
 }
 @media (hover:hover) {
     .open-ticket-container:hover { background-color: var(--hover);  }
@@ -32,11 +52,12 @@ body { --input-border: #cfd2d6; --input-background: #f0f0f0; --input-placeholder
 
 /*  Outline */
 #input-customer-container, #input-device-container { display: flex; flex-wrap: wrap; padding: var(--inner-padding); gap: var(--inner-padding); justify-content: center; }
-.new-ticket-submit-button { width: 300px; height: 80px; font-size: 16px; font-weight: 500; background-color: var(--background); border: 2px solid var(--select); }
+.new-ticket-submit-button { width: 300px; height: 80px; font-size: 16px; font-weight: 500; background-color: var(--background); border: 2px solid var(--select); box-shadow: 0 1px 4px var(--shadow); }
 .new-ticket-submit-button:hover { background-color: var(--submit-hover);}
 
 /*  Customer Information  */
-.input-shell { width: 100%; min-width: 100%; max-height: 52px; }
+.input-shell { width: 100%; min-width: 100%; max-height: 52px; display: flex; gap: var(--inner-padding); }
+.input-shell.name { display: block; gap: 0; }
 .input-container { width: 100%; height: 52px; padding: 0 var(--inner-padding); border: 2px solid var(--input-border); 
     border-radius: var(--border-radius); background-color: var(--input-background); display: flex; align-items: center; }
 .input-container:focus-within { border: 2px solid var(--input-blue); color: var(--input-blue); background-color: var(--background); }
@@ -57,7 +78,7 @@ body { --input-border: #cfd2d6; --input-background: #f0f0f0; --input-placeholder
 #new-repair-summary { width: 100%; padding: var(--inner-padding); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--hover);
     padding: var(--inner-padding); flex-wrap: wrap; color: var(--default); }
 #new-repair-summary.error { background-color: var(--input-red); }
-.input-object { display: flex; width: 100%; gap: var(--inner-padding); flex-wrap: wrap; padding: var(--inner-padding); justify-content: center; }
+.input-object { display: flex; width: 100%; gap: var(--inner-padding); flex-wrap: wrap; padding: var(--inner-padding); justify-content: center; align-items: center; }
 .input-object.hidden, #new-repair-summary.hidden, #new-ticket-checkboxes.hidden, #repair-information-error.hidden { display: none; }
 #input-repair-other { flex-direction: column; align-items: center; justify-content: flex-start; gap: 0; }
 .other-device-input-container { margin: 0 8px; }
@@ -83,10 +104,11 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 #new-ticket-checkboxes, #new-ticket-custom-inputs { border-top: 1px solid var(--hover); }
 #new-ticket-custom-inputs { gap: 0; }
 #repair-information-error { color: var(--input-red); padding-left: 8px; }
-
+.color-box { width: 28px; min-width: 28px; height: 28px; border: 1px solid var(--input-placeholder); box-sizing: border-box; padding: 0; }
+.color-box.selected { border: 3px solid var(--input-border); }
 
 @media (min-width: 500px) {
-    .input-shell { width: calc(50% - (var(--inner-padding) / 2)); min-width: 250px; }
+    #input-customer-container .input-shell { width: calc(50% - (var(--inner-padding) / 2)); min-width: 250px; }
 }
 @media (min-width: 1600px) {
     .object.large.nr { width: calc(50% - var(--outer-padding) / 2); height: auto; }
@@ -94,4 +116,80 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 @media (hover:hover) {
     .x-input:hover { background-color: var(--hover); cursor: pointer; }
     button.type:hover, button.device:hover { background-color: var(--hover); }
+    .color-box:hover { cursor: pointer; }
+}
+
+
+
+
+/* || TICKET ||
+/*  Outline */
+#ticket-left-column, #ticket-right-column { display: flex; flex-direction: column; flex: 1 1 0; flex-wrap: wrap; gap: var(--outer-padding); }
+
+/*  Ticket Information   */
+.ticket-details-container { display: flex; flex-wrap: wrap; width: 100%; }
+#ticket-inputs { padding: var(--inner-padding); width: 100%; }
+.ticket-input-container { display: flex; flex-wrap: wrap; width: 100%; align-items: center; justify-content: flex-start; }
+.ticket-input-single { padding: calc(var(--inner-padding) / 2) var(--inner-padding); font-size: 14px; width: 200px; }
+.checkbox-container.ticket-input-single { margin: 0; padding: calc(var(--inner-padding) / 2) 8px; }
+#ticket-status { display: flex; width: 100%; flex-direction: column; align-items: center; justify-content: center; padding: var(--outer-padding); }
+.complete-ticket { margin: 20px 0 0 50px; font-size: 12px; font-weight: 500; }
+
+/*  Customer Description    */
+.ticket-customer-description-single-container { display: flex; padding: calc(var(--inner-padding) / 2); align-items: center;  }
+.ticket-customer-description-single { font-size: 14px; font-weight: 500; margin-left: var(--inner-padding); overflow: hidden; white-space: none;}
+
+/*  Ticket Notes    */
+.ticket-note-container { padding: var(--inner-padding) var(--outer-padding); border-bottom: 1px solid var(--select); text-transform: uppercase; width: 100%; }
+.ticket-note-container:last-of-type { border-bottom: 0; }
+.ticket-note-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
+.ticket-note-content { font-size: 14px; font-weight: 500; text-transform: none; padding-top: var(--inner-padding); white-space: normal; }
+
+/*  Repair List     */
+#ticket-repair-container { padding: var(--inner-padding); }
+.ticket-repair-single { width: 100%; border-bottom: 1px solid var(--select);  }
+.ticket-repair-single-text { width: 100%; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: var(--inner-padding); overflow: hidden; text-align: left;
+    white-space: nowrap; transition-duration: .3s; height: calc(36px + var(--inner-padding)); padding: 0 var(--inner-padding); border: 0; background-color: transparent; }
+.ticket-remove-text, .ticket-part-text { font-size: 12px; }
+.ticket-repair-single-inputs-container { height: 0; transition-duration: .2s; overflow: hidden; white-space: nowrap; }
+.ticket-repair-single-input { display: flex; align-items: center; gap: calc(var(--inner-padding) / 2); font-size: 16px; font-weight: 500; }
+.ticket-repair-single-inputs-container input { height: 28px; background-color: var(--input-background); border: 1px solid var(--input-border); 
+    border-radius: var(--border-radius); padding: 0 calc(var(--inner-padding) / 2); font-size: 16px; text-align: center; visibility: hidden; }
+.ticket-repair-single.open .hide-me { display: none; }
+.ticket-repair-single .ticket-remove-text { display: none; color: var(--input-red); }
+.ticket-repair-single .ticket-part-text { display: none; color: var(--input-blue); }
+.ticket-repair-single.open .ticket-remove-text, .ticket-repair-single.open .ticket-part-text { display: block; }
+.ticket-repair-single.open .ticket-part-text.ordered { display: block; color: var(--default); }
+.ticket-repair-single.open .checkbox { width: 28px; min-width: 28px; }
+.ticket-repair-single.open > .ticket-repair-single-inputs-container { height: 90px; }
+.ticket-repair-single.open > .ticket-repair-single-inputs-container input { visibility: visible; }
+
+/*  Invoices & Payment Summary   */
+#ticket-right-column .object.medium { flex: 1 1 0; min-width: 270px; }
+.invoice-refund-text { font-size: 12px; color: darkred; width: 60px; text-align: right; }
+
+/*  Popup Page  */
+#popup-page { position: absolute; width: 100vw; height: 100vh; top: 0; left: 0; background-color: var(--search-background); display: flex; 
+    align-items: flex-start; justify-content: center; padding: 60px var(--outer-padding); }
+#popup-page.hidden { display: none; }
+#popup-x { padding: var(--inner-padding); position: absolute; right: 0; top: 0; color: var(--menu-font); font-size: 28px; }
+#popup-container { width: 100%; max-width: 500px; display: flex; flex-wrap: wrap; background-color: var(--background); padding: var(--outer-padding); 
+    border-radius: var(--border-radius); }
+.popup-header { width: 100%; text-align: center; font-size: 16px; font-weight: 700; padding-bottom: var(--inner-padding); }
+
+
+@media (min-width: 620px) {
+    #ticket-inputs { width: 50%; }
+    #ticket-status { width: 50%; }
+}
+@media (max-width: 800px) {
+    #ticket-left-column, #ticket-right-column { min-width: 100%; max-width: none; }
+}
+@media (hover:hover) {
+    .ticket-repair-single-text:hover { background-color: var(--hover); cursor: pointer; }
+    .ticket-repair-single.open > .ticket-repair-single-text:hover { background-color: transparent; cursor: default; }
+    .ticket-remove-text:hover, .ticket-part-text:hover { text-decoration: underline; cursor: pointer; }
+    .ticket-part-text.ordered:hover { text-decoration: none; cursor: default; }
+    .invoice-refund-text:hover { text-decoration: underline; color: red; cursor: pointer; }
+    #popup-x:hover{ cursor: pointer; background-color: var(--menu-hover); }
 }

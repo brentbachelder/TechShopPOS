@@ -24,12 +24,16 @@ body {
     /* Object Header Colors */
     --header-gray: rgba(0, 0, 0, .06);
     --header-red: rgba(153, 0, 0, 0.2);
+    --header-green: rgba(51, 130, 44, .3);
+    --header-yellow: rgba(255, 222, 3, .3);
 
     --menu-size: clamp(260px, 26%, 340px);
     --mobile-menu-height: 60px;
     --border-radius: 8px;
     --inner-padding: 16px;
     --outer-padding: 32px;
+
+    color: var(--default);
 }
 
 body.dark-theme {
@@ -50,7 +54,10 @@ body.dark-theme {
     --header-gray: rgba(255, 255, 255, .04);
     --header-green: rgba(54, 149, 47, .25);
     --hover-green: rgba(54, 149, 47, .33);
+
 }
 
 header.gray { background-color: var(--header-gray); }
 header.red { background-color: var(--header-red); }
+header.green { background-color: var(--header-green); }
+header.yellow { background-color: var(--header-yellow); }

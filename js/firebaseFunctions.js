@@ -5,7 +5,7 @@ var finishedLoading = false;
 var postLoadingPage = "";
 
 // Object variables for database information
-var Customers = {}, CustomerSearch = {}, TicketSearch = [], OpenTickets = {}, Settings = {}, Admin = {}, Prices = {};
+var Customers = {}, CustomerSearch = {}, TicketSearch = [], OpenTickets = {}, Settings = {}, Admin = {}, Prices = {}, Parts = {};
 
 // Initialize the App
 function InitializeApp() {
@@ -50,11 +50,16 @@ db.ref("Prices").on('value', function (snap) {
     Prices = snap.val();
 });
 
+// On value change listener for Part Orders
+db.ref("Parts").on('value', function (snap) {
+    Parts = snap.val();
+});
+
 // On value change listener for Settings
 db.ref("Settings").on('value', function (snap) {
     Settings = snap.val();
     document.getElementById("business-name-primary").innerHTML = Settings.General.BusinessName;
-    document.getElementById("business-name-secondary").innerHTML = Settings.General.City + ", " + Settings.General.State;
+    document.getElementById("business-name-secondary").innerHTML = Settings.General.BusinessCity + ", " + Settings.General.BusinessState;
 });
 
 // On value change listener for Admin
