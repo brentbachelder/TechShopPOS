@@ -37,14 +37,15 @@
                 <div class="material-symbols-outlined">price_change</div>
                 <div class="menu-link">POS / Quick Sale</div>
             </a>
-            <a href="#part-orders" id="part-orders" onclick="ChangePage('part-orders')">
+            <a href="#parts" id="parts" onclick="ChangePage('parts')">
                 <div class="material-symbols-outlined">architecture</div>
-                <div class="menu-link">Part Orders</div>
+                <div class="menu-link">Parts</div>
             </a>
             <button id="settings" onclick="OpenSettings()">
                 <div class="material-symbols-outlined">settings</div>
                 <div class="menu-link">Settings&nbsp;&nbsp;&nbsp;<div class="material-symbols-outlined hidden" id="settings-arrow">arrow_drop_down</div></div>
             </button>
+            <button onclick="document.getElementById('message-center-container').classList.toggle('hidden')">Hide</button>
             <div id="menu-settings" class="hidden">
                 <a href="#settings-general" id="settings-general" onclick="ChangePage('settings-general')">
                     <div class="menu-link">General</div>
@@ -109,6 +110,7 @@
         </div>
     </div>
     <div id="click-out" class="hidden" onclick="CloseMenu()"></div>
+    <div id="message-center-container"><div id="message-box">Lets trya a little bit longer message to see what's what.</div></div>
     <script type="text/javascript" src="js/basicFunctions.js"></script>
     
     <script type="text/javascript" src="js/dashboard.js"></script>

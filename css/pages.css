@@ -142,6 +142,7 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 /*  Ticket Notes    */
 .ticket-note-container { padding: var(--inner-padding) var(--outer-padding); border-bottom: 1px solid var(--select); text-transform: uppercase; width: 100%; }
 .ticket-note-container:last-of-type { border-bottom: 0; }
+.ticket-note-container.invoice { background-color: rgba(51, 130, 44, .1); }
 .ticket-note-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
 .ticket-note-content { font-size: 14px; font-weight: 500; text-transform: none; padding-top: var(--inner-padding); white-space: normal; }
 
@@ -173,9 +174,38 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
     align-items: flex-start; justify-content: center; padding: 60px var(--outer-padding); }
 #popup-page.hidden { display: none; }
 #popup-x { padding: var(--inner-padding); position: absolute; right: 0; top: 0; color: var(--menu-font); font-size: 28px; }
-#popup-container { width: 100%; max-width: 500px; display: flex; flex-wrap: wrap; background-color: var(--background); padding: var(--outer-padding); 
-    border-radius: var(--border-radius); }
+#popup-container { width: calc(316px + var(--outer-padding) + var(--outer-padding)); display: flex; flex-wrap: wrap; background-color: var(--background); 
+    padding: var(--outer-padding); border-radius: var(--border-radius); gap: var(--inner-padding); justify-content: center; }
 .popup-header { width: 100%; text-align: center; font-size: 16px; font-weight: 700; padding-bottom: var(--inner-padding); }
+.popup-input-container { width: 316px; }
+.popup-input-container.small { width: 150px; }
+.popup-input-container.box-container { width: 150px; display: flex; flex-direction: column; align-items: center; }
+.popup-input-container .header { font-size: 12px; font-weight: 700; width: 100%; text-align: left; margin-left: var(--border-radius); margin-bottom: 4px; display: flex; }
+.popup-input-container .popup-required { display: none; }
+.popup-input-container.box-container .header { text-align: center; margin-left: 0; justify-content: center; }
+.popup-input-container input { width: 100%; height: 48px; font-size: 14px; background-color: var(--background); border: 2px solid var(--default); 
+    border-radius: var(--border-radius); padding: 0 var(--inner-padding); text-align: left; margin-bottom: var(--inner-padding); }
+.popup-input-container input.small { height: 36px; }
+.popup-input-container input:placeholder-shown { background-color: var(--input-background); border-color: var(--select); }
+.popup-input-container input:focus { background-color: var(--background); border-color: var(--default); }
+.popup-input-container.error .header { color: var(--input-red); }
+.popup-input-container.error input { border-color: var(--input-red); }
+.popup-input-container.error .popup-required { display: block; }
+.popup-switch { display: flex; height: 60px; border: 2px solid green; border-radius: var(--border-radius); }
+.popup-switch-single { width: 80px; font-size: 12px; color: green; background-color: var(--background); border-right: 2px solid green; 
+    display: flex; flex-direction:column; justify-content: center; align-items: center; }
+.popup-switch-single.selected { background-color: green; color: #ffffff; }
+.popup-switch-single:first-of-type { border-radius: var(--border-radius) 0 0 var(--border-radius); }
+.popup-switch-single:last-of-type { border-right: 0; border-radius: 0 var(--border-radius) var(--border-radius) 0; }
+.popup-switch-note { width: 100%; display: flex; align-items: center; border: 1px solid var(--select); border-radius: var(--border-radius); }
+.popup-switch-note-single { flex: 1 1 0; padding: 8px 0; text-align: center; font-size: 12px; font-weight: 700; border-right: 1px solid var(--select); }
+.popup-switch-note-single:last-of-type { border-right: 0; }
+.popup-switch-note-single.selected { background-color: var(--hover); }
+#popup-page textarea { width: 100%; height: 100px; font-size: 14px; border: 1px solid var(--select); border-radius: var(--border-radius); 
+    padding: calc(var(--inner-padding) / 2) var(--inner-padding); resize: none; }
+#popup-page textarea::-webkit-input-placeholder { color: default; }    
+#popup-page textarea.error { border-color: red; }
+#popup-page textarea.error::-webkit-input-placeholder { color: red; }
 
 
 @media (min-width: 620px) {
@@ -192,4 +222,42 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
     .ticket-part-text.ordered:hover { text-decoration: none; cursor: default; }
     .invoice-refund-text:hover { text-decoration: underline; color: red; cursor: pointer; }
     #popup-x:hover{ cursor: pointer; background-color: var(--menu-hover); }
+    .popup-switch-single:hover, .popup-switch-note-single:hover { cursor: pointer; }
+}
+
+
+
+
+/* || PART ORDERS ||
+/*  Parts   */
+.part-order-single-container { display: flex; width: 100%; padding: calc(var(--outer-padding) / 2) 8px; border-bottom: 1px solid var(--select); align-items: center;
+    gap: var(--inner-padding); }
+.part-order-single-container .material-symbols-outlined { font-size: 22px; }
+.part-order-single-container:last-of-type { border-bottom: 0; }
+.part-date { width: 90px; }
+.part-ticket { width: 40px; text-align: center; }
+.part-description { width: 60%; min-width: 0; text-align: left; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.part-tracking-container { width: 40%; min-width: 0; display: flex; align-items: center; gap: 10px; }
+.part-tracking-index { display: none; font-size: 12px; font-weight: 700; }
+.part-tracking { width: calc(100% - 100px); max-width: 220px; text-decoration: underline; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.part-tracking-edit { color: red; font-size: 10px; font-weight: 700; padding: 4px 0; width: 40px; text-align: center; }
+.part-tracking-edit.empty { width: 100%; color: blue; text-align: left; }
+.part-tracking.tracks { text-decoration: underline; }
+.mark-part-received { font-size: 12px; padding: 14px 10px; }
+.icon-box.hidden { display: none; }
+
+@media (max-width: 768px) {
+    #part-order-header { display: none; }
+    .part-order-single-container { flex-wrap: wrap; }
+    .part-date, .part-tracking-edit.material-symbols-outlined, .part-ticket.material-symbols-outlined { display: none; }
+    .part-description { width: 100%; }
+    .part-tracking-container { width: 100%; padding-top: 8px; }
+    .part-tracking-index { display: block; }
+    .part-tracking-edit-small { display: block; }
+}
+@media (hover:hover) {
+    .part-ticket:hover, .part-tracking:hover { color: var(--text-hover); cursor: pointer; }
+    .part-tracking-edit:hover { color: darkred; cursor: pointer; }
+    .part-tracking-edit.empty:hover { color: darkblue; }
+    .mark-part-received:hover { background-color: var(--hover); cursor: pointer; }
 }

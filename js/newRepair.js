@@ -578,7 +578,7 @@ async function CreateNewTicket() {
     ticketInfo['Type'] = selectedType.substring(4);
     ticketInfo['NextRepairNumber'] = Object.keys(masterRepair).length;
     var note = {};
-    var noteDate = DateConvert();
+    var noteDate = DateConvert(true);
     note[noteDate] = {Content : "Ticket Created", Type : "Tech Note"};
     ticketInfo['Notes'] = note;
     var defaultStatus = '';

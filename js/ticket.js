@@ -4,6 +4,7 @@ var CurrentInvoices = {};
 var ticketNumber;
 var prevInput;
 var popupInInput = false;
+var paymentType;
 
 function InitTicket(num) {
     document.getElementById("page-title").innerHTML = "TICKET INFORMATION";
@@ -29,6 +30,9 @@ async function GetTicketInfo(num) {
                 CurrentInvoices[key] = snap.val();
             });
         }
+    }
+    else {
+        for (var key in CurrentInvoices) delete CurrentInvoices[key];
     }
     DrawFunctions();          
 }
@@ -119,6 +123,24 @@ function UpdateRepair(element, repairNum, isPrice = false) {
     DrawTicketPaymentSummary();
 }
 
+function RefundInvoice(invoiceNumber) {
+    if(confirm("Refund this invoice?") == true) {
+        var date = DateConvert(CurrentInvoices[invoiceNumber].FullDate);
+        var year = date.substring(0,4);
+        var month = date.substring(4,6);
+        var day = date.substring(6, 8);
+        var refundAmount = CurrentInvoices[invoiceNumber].Amount;
+        db.ref("Invoices/" + year + "/" + month + "/" + day + "/" + invoiceNumber + "/" + "RefundAmount").set(refundAmount);
+        CurrentInvoices[invoiceNumber].RefundAmount = refundAmount;
+        DrawTicketInvoices();
+        DrawTicketPaymentSummary();
+        var currentDaySales = Admin.PaymentTotals[year][month][day];
+        Admin.PaymentTotals[year][month][day] = currentDaySales - refundAmount;
+        db.ref("Admin/PaymentTotals/" + year + "/" + month + "/" + day).set(currentDaySales - refundAmount);
+        console.log(CurrentInvoices);
+    }
+}
+
 
 /* Popup Pages */
 function ClickToClosePopup(event) {
@@ -133,49 +155,182 @@ function ClosePopup() {
     else popupInInput = false;
 }
 
+function CheckPopupEnter(event) {
+    if(event.keyCode == 13) {
+        if(event.target.id == "add-repair-desc") document.getElementById("add-repair-price").focus();
+        else if(event.target.id == "add-repair-price") SubmitTicketAddRepair();
+        else if(event.target.id == "add-repair-payment") {
+            popupInInput = false;
+            SubmitTicketAddPayment();
+        }
+    }
+}
+
 function TicketAddRepair() {
     document.getElementById("popup-page").classList.remove("hidden");
     var content = `
         <div class="popup-header">NEW REPAIR</div>
-        <div class="input-shell">
-            <div class="input-container" id="repair-desc-container">
-                <div class="miniput">
-                    <div id="repair-desc-miniput" class="miniput-description">Repair Description</div>
-                    <input type="text" id="repair-desc" placeholder="Repair Description *" onfocus="FocusPopupInput('repair-desc', 'Repair Description')" required>
-                </div>
-                <div class="x-input" onmousedown="ClearNewTicketInput('repair-desc')"><div class="material-symbols-outlined">close</div></div>
-            </div>
+        <div id="add-repair-desc-container" class="popup-input-container">
+            <div class="header">REPAIR DESCRIPTION<div class="popup-required">&nbsp;&nbsp;&nbsp;&nbsp;- Can't be Blank</div></div>
+            <input id="add-repair-desc" placeholder="Repair Description *" onkeydown="CheckPopupEnter(event)">
         </div>
-        <div class="input-shell" style="max-width: 50%;">
-            <div class="input-container" id="repair-price-container">
-                <div class="miniput">
-                    <div id="repair-price-miniput" class="miniput-description">Price</div>
-                    <input type="text" id="repair-price" placeholder="Price" onfocus="FocusPopupInput('repair-price', 'Price')">
-                </div>
-                <div class="x-input" onmousedown="ClearNewTicketInput('repair-price')"><div class="material-symbols-outlined">close</div></div>
-            </div>
+        <div class="popup-input-container small">
+            <div class="header">PRICE</div>
+            <input id="add-repair-price" type="number" class="small" placeholder="0.00" onfocus="this.value = ''" onkeydown="CheckPopupEnter(event)" value="0.00"
+                onblur="if(this.value == '') this.value = '0.00'">
+        </div>
+        <div class="popup-input-container box-container">
+            <div class="header">TAX</div>
+            <button id="add-repair-tax" class="checkbox material-symbols-outlined selected" onclick="CheckboxToggle(this)"></button>
+        </div>
+        <div style="width: 100%; text-align: center;">
+            <button id="other-apply-button" onclick="SubmitTicketAddRepair()">Apply</button>
         </div>
     `;
     document.getElementById("popup-container").innerHTML = content;
-    document.getElementById("repair-desc").focus();
+    document.getElementById("add-repair-desc").focus();
     popupInInput = true;
 }
 
-function FocusPopupInput(id, miniText) {
-    document.getElementById(id + "-container").classList.remove("error");
-    document.getElementById(id + "-miniput").innerHTML = miniText;
+function SubmitTicketAddRepair() {
+    if(document.getElementById("add-repair-desc").value == '') {
+        document.getElementById("add-repair-desc-container").classList.add("error");
+        document.getElementById("add-repair-desc").focus();
+    }
+    else {
+        var hasTax = false;
+        if(document.getElementById("add-repair-tax").classList.contains("selected")) hasTax = true;
+        var repairObject = { DiscountDollar : 0, DiscountPercent : 0, Display : document.getElementById("add-repair-desc").value, 
+            Price : parseFloat(document.getElementById("add-repair-price").value), Quantity : 1, Tax : hasTax };
+        db.ref("Tickets/" + ticketNumber + "/Repairs/" + CurrentTicket.NextRepairNumber).update(repairObject);
+        db.ref("Tickets/" + ticketNumber + "/NextRepairNumber").set(CurrentTicket.NextRepairNumber + 1);
+        CurrentTicket.Repairs[CurrentTicket.NextRepairNumber] = repairObject;
+        CurrentTicket.NextRepairNumber++;
+        popupInInput = false;
+        ClosePopup();
+        DrawTicketRepairs();
+        DrawTicketPaymentSummary();
+    }
+}
+
+function TicketAddPayment() {
+    document.getElementById("popup-page").classList.remove("hidden");
+    var content = `
+        <div id="add-repair-payment-container" class="popup-input-container" style="width: 240px;">
+            <div class="header">PAYMENT AMOUNT<div class="popup-required">&nbsp;&nbsp;&nbsp;&nbsp;invalid amount</div></div>
+            <input id="add-repair-payment" type="number" placeholder="0.00" onfocus="if(this.value == '0.00') this.value = ''" onkeydown="CheckPopupEnter(event)" 
+                onblur="if(this.value == '') this.value = '0.00'; popupInInput = false;" style="height: 80px; font-size: 28px; text-align: center;">
+        </div>
+        <div class="popup-switch">
+            <div id="ticket-add-payment-card" class="popup-switch-single selected" tabindex="0" onclick="TicketAddPaymentSwitch(this, 'Card')"><div>CARD</div>
+                <div class="material-symbols-outlined">credit_card</div></div>
+            <div id="ticket-add-payment-cash" class="popup-switch-single" tabindex="0" onclick="TicketAddPaymentSwitch(this, 'Cash')"><div>CASH</div>
+                <div class="material-symbols-outlined">payments</div></div>
+            <div id="ticket-add-payment-other" class="popup-switch-single" tabindex="0" onclick="TicketAddPaymentSwitch(this, 'Other')"><div>OTHER</div>
+                <div class="material-symbols-outlined">shopping_bag</div></div>
+        </div>
+        <div style="width: 100%; text-align: center; margin-top: var(--outer-padding);">
+            <button id="other-apply-button" onclick="SubmitTicketAddPayment()">Apply</button>
+        </div>
+    `;
+    paymentType = 'Card';
+    document.getElementById("popup-container").innerHTML = content;
+    document.getElementById("add-repair-payment").focus();
+    document.getElementById("add-repair-payment").value = CurrentTicket.Balance.toFixed(2);
     popupInInput = true;
 }
 
-function ClearPopupInput(id) {
-    document.getElementById(id).value = '';
-    setTimeout(function(){ document.getElementById(id).focus(); }, 1);
+function TicketAddPaymentSwitch(element, value) {
+    var switches = document.getElementById("popup-container").getElementsByClassName("popup-switch-single");
+    for(var i = 0; i < switches.length; i++) switches[i].classList.remove("selected");
+    element.classList.add("selected");
+    paymentType = value;
+}
+
+function SubmitTicketAddPayment() {
+    var amount = document.getElementById("add-repair-payment").value;
+    amount = parseFloat(amount);
+    amount = Math.floor(amount * 100) / 100;
+    if(amount > 0 && amount <= CurrentTicket.Balance) {
+        var invoiceDate = DateConvert();
+        var year = invoiceDate.substring(0,4);
+        var month = invoiceDate.substring(4,6);
+        var day = invoiceDate.substring(6, 8);
+        invoiceDate = parseInt(invoiceDate);
+        var invoiceObject = { Amount : amount, FullDate : invoiceDate, RefundAmount : 0, Ticket : parseInt(ticketNumber), Type : paymentType };
+        db.ref("Invoices/" + year + "/" + month + "/" + day + "/" + Admin.CurrentInvoiceNumber).update(invoiceObject);
+        CurrentInvoices[Admin.CurrentInvoiceNumber] = invoiceObject;
+        var currentDaySales = 0;
+        if(Admin.PaymentTotals.hasOwnProperty(year) && Admin.PaymentTotals[year].hasOwnProperty(month) && Admin.PaymentTotals[year][month].hasOwnProperty(day)) {
+            currentDaySales = Admin.PaymentTotals[year][month][day];
+        }
+        db.ref("Admin/PaymentTotals/" + year + "/" + month + "/" + day).set(currentDaySales + amount);
+        db.ref("Tickets/" + ticketNumber + "/Invoices/" + Admin.CurrentInvoiceNumber).set(invoiceDate);
+        if(CurrentTicket.hasOwnProperty('Invoices')) CurrentTicket.Invoices[Admin.CurrentInvoiceNumber] = invoiceDate;
+        else CurrentTicket['Invoices'] = { [Admin.CurrentInvoiceNumber] : invoiceDate };
+        db.ref("Admin/CurrentInvoiceNumber").set(Admin.CurrentInvoiceNumber + 1);
+        ClosePopup();
+        DrawTicketPaymentSummary();
+        DrawTicketInvoices();
+    }
+    else {
+        document.getElementById("add-repair-payment-container").classList.add("error");
+        document.getElementById("add-repair-payment").focus();
+    }
+}
+
+function TicketAddNote() {
+    document.getElementById("popup-page").classList.remove("hidden");
+    var content = `
+        <div class="popup-header">NEW NOTE</div>
+        <div class="popup-switch-note">
+            <div id="tech-note" class="popup-switch-note-single selected" onclick="ChangeNoteType('tech-note')">Tech Note</div>
+            <div id="invoice-note" class="popup-switch-note-single" onclick="ChangeNoteType('invoice-note')">Invoice Note</div>
+        </div>
+        <textarea id="add-note-contents" onfocus="ClearNoteError()"></textarea>
+        <div style="width: 100%; text-align: center;">
+            <button id="other-apply-button" onclick="AddTicketNote()">Apply</button>
+        </div>
+    `;
+    document.getElementById("popup-container").innerHTML = content;
+    document.getElementById("add-note-contents").focus();
     popupInInput = true;
 }
 
+function ChangeNoteType(id) {
+    var singleNotes = document.getElementsByClassName("popup-switch-note-single");
+    for(var i = 0; i < singleNotes.length; i++) singleNotes[i].classList.remove("selected");
+    document.getElementById(id).classList.add("selected");
+    popupInInput = false;
+}
+
+function AddTicketNote() {
+    if(document.getElementById("add-note-contents").value == "") {
+        document.getElementById("add-note-contents").placeholder = "* Can't be Blank.";
+        document.getElementById("add-note-contents").classList.add("error");
+    }
+    else {
+        var date = DateConvert(true);
+        var type = "Tech Note";
+        if(document.getElementById("invoice-note").classList.contains("selected")) type = "Invoice Note";
+        CurrentTicket.Notes[date] = {Content : document.getElementById("add-note-contents").value, Type : type};
+        db.ref("Tickets/" + ticketNumber + "/Notes/" + date).update({Content : document.getElementById("add-note-contents").value, Type : type});
+        popupInInput = false;
+        ClosePopup();
+        DrawTicketNotes();
+    }
+}
+
+function ClearNoteError() {
+    document.getElementById("add-note-contents").classList.remove("error");
+    document.getElementById("add-note-contents").placeholder = "";
+}
+
+
+/* Draw Page Information */
 
 async function DrawTicketInvoices() {
-    var content = '<div style="padding: var(--inner-padding); text-align: center;">(NO INVOICES)</div>';
+    var content = '<div style="padding: var(--inner-padding); text-align: center;">(no invoices)</div>';
 
     if(Object.keys(CurrentInvoices).length > 0) {
         content = '';
@@ -207,14 +362,15 @@ async function DrawTicketInvoices() {
 }
 
 function DrawTicketPaymentSummary() {
-    var subTotal = 0, tax = 0, discounts = 0, payments = 0, total=  0;
+    var subTotal = 0, tax = 0, discounts = 0, payments = 0, total = 0;
     var taxRate = Settings.General.SalesTax / 100;
 
     for(var key in CurrentTicket.Repairs) {
-        currentSub = (parseFloat(CurrentTicket.Repairs[key].Price) * parseInt(CurrentTicket.Repairs[key].Quantity));
-        subTotal += currentSub;
-        discounts += CurrentTicket.Repairs[key].DiscountDollar + (currentSub - CurrentTicket.Repairs[key].DiscountDollar) * (CurrentTicket.Repairs[key].DiscountPercent / 100);
-        if(CurrentTicket.Repairs[key].Tax) tax += (subTotal - discounts) * taxRate;
+        var currentSub = CurrentTicket.Repairs[key].Price * parseInt(CurrentTicket.Repairs[key].Quantity);
+        subTotal += Math.round(currentSub * 100) / 100;
+        var curDiscounts = CurrentTicket.Repairs[key].DiscountDollar + (currentSub - CurrentTicket.Repairs[key].DiscountDollar) * (CurrentTicket.Repairs[key].DiscountPercent / 100);
+        discounts += Math.round(curDiscounts * 100) / 100;
+        if(CurrentTicket.Repairs[key].Tax) tax += Math.round(((currentSub - curDiscounts) * taxRate) * 100) / 100;
     }
     if(Object.keys(CurrentInvoices).length > 0) {
         for(var key in CurrentInvoices) {
@@ -223,12 +379,18 @@ function DrawTicketPaymentSummary() {
     }
     total = subTotal + tax - discounts - payments;
     if(total < 0) total = 0;
+    total = Math.round(total * 100) / 100;
+    db.ref("Tickets/" + ticketNumber + "/Balance").set(total);
+    CurrentTicket.Balance = total;
     
     if(total > 0) {
+        document.getElementById("payment-summary-header").innerHTML = `<h1>PAYMENT SUMMARY</h1>
+            <button class="icon-box" onclick="TicketAddPayment()"><div class="material-symbols-outlined">add_card</div></button>`;
         document.getElementById("payment-summary-header").classList.remove("green");
         document.getElementById("payment-summary-header").classList.add("red");
     }
     else {
+        document.getElementById("payment-summary-header").innerHTML = '<h1>PAYMENT SUMMARY</h1>';
         document.getElementById("payment-summary-header").classList.remove("red");
         document.getElementById("payment-summary-header").classList.add("green");
     }
@@ -265,7 +427,7 @@ function DrawTicketRepairs() {
         var tax = '';
         var checkSelected = '';
         if(CurrentTicket.Repairs[key].Tax) { tax = '+ tax'; checkSelected = ' selected'; }
-        var partOrder = `<div id="part-order-${key}" class="ticket-part-text" tabindex="0" onclick="AddToPartOrder(${key}), event.stopPropagation()">Add to Part Order</div>`;
+        var partOrder = `<div id="part-order-${key}" class="ticket-part-text" tabindex="0" onclick="AddToPartOrder(${key}), event.stopPropagation()">Add to Parts</div>`;
         for(var part in Parts) {
             if(Parts[part].Ticket == ticketNumber && Parts[part].RepairNumber == key) partOrder = `<div id="part-order-${key}" class="ticket-part-text ordered">Part Ordered</div>`;
         }
@@ -322,8 +484,10 @@ function DrawTicketNotes() {
         if(hour > 12) { ampm = 'pm'; hour -= 12; }
         if(hour == 12) ampm = 'pm';
         var date = key.substring(4,6) + "/" + key.substring(6,8) + "/" + key.substring(0,4) + " @ " + hour + ":" + key.substring(10,12) + " " + ampm;
+        var invoiceNote = "";
+        if(CurrentTicket.Notes[key].Type == "Invoice Note") invoiceNote = " invoice";
         content += `
-            <div class="ticket-note-container">
+            <div class="ticket-note-container${invoiceNote}">
                 <div class="ticket-note-header">
                     <div>${CurrentTicket.Notes[key].Type}</div>
                     <div>${date}</div>
@@ -422,7 +586,7 @@ function DrawTicket() {
             <div class="object large">
                 <header class="gray">
                     <h1>NOTES</h1>
-                    <button class="icon-box" onclick="ClearNewTicketCustomer()"><div class="material-symbols-outlined">add</div></button>
+                    <button class="icon-box" onclick="TicketAddNote()"><div class="material-symbols-outlined">add</div></button>
                 </header>
                 <div id="ticket-notes"></div>
             </div>
@@ -439,7 +603,7 @@ function DrawTicket() {
                 <div class="object medium">
                     <header id="payment-summary-header" class="green">
                         <h1>PAYMENT SUMMARY</h1>
-                        <button class="icon-box" onclick="ClearNewTicketCustomer()"><div class="material-symbols-outlined">shopping_cart</div></button>
+                        <button class="icon-box" onclick="TicketAddPayment()"><div class="material-symbols-outlined">shopping_cart</div></button>
                     </header>
                     <div id="payment-summary-container" style="padding: var(--inner-padding); text-align: center;"></div>
                 </div>

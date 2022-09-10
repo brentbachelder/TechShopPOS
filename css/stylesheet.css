@@ -138,6 +138,16 @@ menu { width: var(--menu-size); min-width: var(--menu-size); background-color: v
 /*  X Out (close search button)    */
 #x-out { padding: var(--inner-padding); position: absolute; right: 0; top: 0; color: var(--menu-font); font-size: 28px; }
 
+/* Message Center   */
+#message-center-container { position: absolute; width: 100vw; bottom: 20px; display: flex; justify-content: center; align-items: center; animation: showMessage 1s; animation-fill-mode: forwards; }
+#message-center-container.hidden { animation: hideMessage 1s; animation-fill-mode: forwards; }
+#message-box { padding: 10px 30px; max-width: 90%; border-radius: 24px; border: 1px solid #5e5e5e; background-color: #ffe7b4; text-align: center; transition-duration: .5s; }
+
+@keyframes hideMessage{ 100% { bottom: -50px; display: none; opacity: 0; } }
+@keyframes showMessage{ 100% { bottom: 20px; display: flex; opacity: 1; } }
+/*@-moz-keyframes hideMessage{ from {bottom: 20px;} to {bottom: 0;}; 0% { opacity: 1; display: flex; } 100% { display: none; opacity: 0; } }
+@-webkit-keyframes hideMessage{ from {bottom: 20px;} to {bottom: 0;}; 0% { opacity: 1; display: flex; } 100% { display: none; opacity: 0; } }*/
+
 @media (hover:hover) {
     .result-container:hover { cursor: pointer; }
     #x-out:hover{ cursor: pointer; background-color: var(--menu-hover); }

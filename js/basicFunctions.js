@@ -33,7 +33,7 @@ function ChangePage(newPage) {
 
             if(newPage == "new-repair") InitNewRepair();
             else if(newPage == "open-tickets") InitOpenTickets();
-            else if(newPage == "part-orders") InitPartOrders();
+            else if(newPage == "parts") InitPartOrders();
             else if(newPage == "pos") InitPos();
             else if(newPage == "reports") InitReports();
             else if(newPage.includes("customer"))  {
@@ -172,7 +172,7 @@ function GetRepairDescription(ticketObject) {
 
 
 // Retrieve Date formatting and Extrapolation
-function DateConvert() {
+function DateConvert(full = false) {
     var YR = new Date().getFullYear();
     var MO = new Date().getMonth() + 1;
     if(MO < 10) { MO = '0' + MO; }
@@ -183,6 +183,11 @@ function DateConvert() {
     var MIN = new Date().getMinutes();
     if(MIN < 10) { MIN = '0' + MIN; }
     var result = YR.toString() + MO.toString() + DAY.toString() + HR.toString() + MIN.toString();
+    if(full) {
+        var SEC = new Date().getSeconds();
+        if(SEC < 10) { SEC = '0' + SEC; }
+        var result = YR.toString() + MO.toString() + DAY.toString() + HR.toString() + MIN.toString() + SEC.toString();
+    }
 	return(result);
 }
 
@@ -246,4 +251,12 @@ function ApplyStatusChange(ticket, status) {
     db.ref('Tickets/' + ticket).update({Status: status});
     if(status == "Completed") db.ref('OpenTickets/' + ticket).remove();
     else db.ref('OpenTickets/' + ticket).set(status);
+}
+
+
+
+// Get two digit number
+function TwoDigit(number) {
+    var x = Math.pow(10, Number(2) + 1);
+    return (Number(number) + (1 / x)).toFixed(2);
 }
