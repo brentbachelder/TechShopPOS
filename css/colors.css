@@ -4,7 +4,7 @@ body {
     --menu-background: rgba(255,255,255, .1);
     --menu-font: #ffffff;
 
-    --hover: rgba(0, 0, 0, .08);
+    --hover: rgba(0, 0, 0, 0.08);
     --text-hover: rgba(0, 0, 0, .65);
     --select: rgba(0, 0, 0, .16);
     --background: #ffffff;

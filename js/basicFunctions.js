@@ -30,6 +30,7 @@ function ChangePage(newPage) {
     if(finishedLoading) {
         if(newPage != currentPage) {
             CloseMenu();
+            ShowLoading();
 
             if(newPage == "new-repair") InitNewRepair();
             else if(newPage == "open-tickets") InitOpenTickets();
@@ -62,6 +63,11 @@ function ChangePage(newPage) {
         }
     }
     else InitializeApp();
+}
+
+function ShowLoading() {
+    document.getElementById("frame").innerHTML = `<div class="small-loading-container"><div class="lds-grid"><div></div><div></div><div></div><div></div><div>
+        </div><div></div><div></div><div></div><div></div></div></div>`;
 }
 
 
@@ -249,11 +255,47 @@ function StatusDropdown(ticket, current) {
 
 function ApplyStatusChange(ticket, status) {
     db.ref('Tickets/' + ticket).update({Status: status});
-    if(status == "Completed") db.ref('OpenTickets/' + ticket).remove();
-    else db.ref('OpenTickets/' + ticket).set(status);
+    if(status == "Completed") {
+        db.ref('OpenTickets/' + ticket).remove();
+        delete ticketsInProgress[ticket];
+    }
+    else {
+        db.ref('OpenTickets/' + ticket).set(status);
+        ticketsInProgress[ticket].Status = status;
+        currentlyUsedStatuses = GetCurrentlyUsedStatuses();
+    }
+    if(currentPage == "open-tickets") {
+        DrawOpenTickets();
+        CreateStatusParents(currentlyUsedStatuses);
+        DrawIndividualOpenTickets(ticketsInProgress);
+    }
 }
 
 
+
+// Show message in Message Center
+var timeOut;
+function MessageCenter(message, secondCount) {
+    const messageCenter = document.getElementById("message-center-container");
+    document.getElementById("message-box").innerHTML = message;
+    if(timeOut !== undefined) clearInterval(timeOut);
+
+    var counter = secondCount * 2;
+    timeOut = setInterval(function () {
+        if(counter == secondCount * 2) {
+            messageCenter.classList.add("show");
+        }
+        else if(counter == 1) {
+            messageCenter.classList.remove("show");
+            messageCenter.classList.add("hide");
+        }
+        else if(counter <= 0) {
+            messageCenter.classList.remove("hide");
+            clearInterval(timeOut);
+        }
+        if(counter > 0) counter--;
+    }, 500);
+}
 
 // Get two digit number
 function TwoDigit(number) {

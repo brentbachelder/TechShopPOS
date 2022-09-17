@@ -1,3 +1,6 @@
+var selectedTrackingNumber = 0;
+var selectedCheckboxes = [];
+
 function InitPartOrders() {
     document.getElementById("page-title").innerHTML = "PARTS";
     document.getElementById("mobile-page-title").innerHTML = "PARTS";
@@ -18,13 +21,18 @@ function GetTrackingPage(trackingNum) {
 }
 
 function OpenTicketCheckbox(element) {
+    selectedCheckboxes = [];
     element.classList.toggle("selected");
     var selectedBoxes = document.getElementById("part-order-container").getElementsByClassName("checkbox");
     var counter = 0;
 
     for(var i = 0; i < selectedBoxes.length; i++) {
-        if(selectedBoxes[i].classList.contains("selected")) counter++;
+        if(selectedBoxes[i].classList.contains("selected")) {
+            counter++;
+            selectedCheckboxes.push(selectedBoxes[i].id);
+        }
     }
+    console.log(selectedCheckboxes);
 
     if(counter > 0) {
         document.getElementById("part-delete-button").classList.remove("hidden");
@@ -36,21 +44,123 @@ function OpenTicketCheckbox(element) {
     }
 }
 
+function CopyTrackingNumber(trackingNumber) {
+    navigator.clipboard.writeText(trackingNumber);
+    MessageCenter("Copied to Clipboard", 2);
+}
+
 function EditTrackingNumber(key) {
-
+    selectedTrackingNumber = key;
+    var val = "";
+    if(Parts[key].Tracking != "" && Parts[key].Tracking != undefined) val = Parts[key].Tracking;
+    document.getElementById("popup-page").classList.remove("hidden");
+    var content = `
+        <div class="popup-header">TRACKING NUMBER</div>
+        <div id="tracking-number-container" class="popup-input-container">
+            <input id="tracking-number" placeholder="Tracking Number" onkeydown="CheckPopupEnter(event)">
+        </div>
+        <div style="width: 100%; text-align: center;">
+            <button id="other-apply-button" onclick="SubmitTrackingNumber()">Apply</button>
+        </div>
+    `;
+    document.getElementById("popup-container").innerHTML = content;
+    document.getElementById("tracking-number").focus();
+    document.getElementById("tracking-number").value = val;
+    popupInInput = true;
 }
 
-function CopyTrackingNumber() {
+function SubmitTrackingNumber() {
+    Parts[selectedTrackingNumber].Tracking = document.getElementById("tracking-number").value;
+    db.ref("Parts/" + selectedTrackingNumber + "/Tracking").set(document.getElementById("tracking-number").value);
+    popupInInput = false;
+    ClosePopup();
+    DrawIndividualParts();
+}
+
+function DeletePartOrders() {
+    for(var i = 0; i < selectedCheckboxes.length; i++) {
+        var repairNum = Parts[selectedCheckboxes[i]].RepairNumber;
+        var ticketNum = Parts[selectedCheckboxes[i]].Ticket;
+
+        if(ticketNum != '' && repairNum != '') {
+            db.ref("Tickets/" + ticketNum + "/Repairs/" + repairNum + "/Ordered").set("Not Ordered");
+            db.ref("Tickets/" + ticketNum + "/Repairs/" + repairNum + "/OrderDate").set('');
+        }
+        delete Parts[selectedCheckboxes[i]];
+        db.ref("Parts/" + selectedCheckboxes[i]).remove();
+    }
+    DrawIndividualParts();
+    document.getElementById("part-delete-button").classList.add("hidden");
+    document.getElementById("part-done-button").classList.add("hidden");
+}
+
+function CompletePartOrders() {
+    for(var i = 0; i < selectedCheckboxes.length; i++) {
+        var repairNum = Parts[selectedCheckboxes[i]].RepairNumber;
+        var ticketNum = Parts[selectedCheckboxes[i]].Ticket;
+
+        if(ticketNum != '' && repairNum != '') db.ref("Tickets/" + ticketNum + "/Repairs/" + repairNum + "/Ordered").set("Received");
+
+        delete Parts[selectedCheckboxes[i]];
+        db.ref("Parts/" + selectedCheckboxes[i]).remove();
+    }
+    DrawIndividualParts();
+    document.getElementById("part-delete-button").classList.add("hidden");
+    document.getElementById("part-done-button").classList.add("hidden");
+}
+
+function NewPartOrder() {
+    var dropdown = GetTicketDropDown();
+
+    document.getElementById("popup-page").classList.remove("hidden");
+    var content = `
+        <div class="popup-header">NEW PART ORDER</div>
+        <div id="new-part-desc-container" class="popup-input-container">
+            <div class="header">DESCRIPTION<div class="popup-required">&nbsp;&nbsp;&nbsp;&nbsp;- Can't be Blank</div></div>
+            <input id="new-part-desc" placeholder="Part" onkeydown="CheckPopupEnter(event)">
+        </div>
+        <div id="new-part-container" class="popup-input-container small">
+            <div class="header">TICKET (optional)</div>
+            ${dropdown}
+        </div>
+        <div style="width: 100%; text-align: center; margin-top: var(--inner-padding);">
+            <button id="other-apply-button" onclick="SubmitNewPartOrder()">Apply</button>
+        </div>
+    `;
+    document.getElementById("popup-container").innerHTML = content;
+    document.getElementById("new-part-desc").focus();
+    popupInInput = true;
+}
+
+function GetTicketDropDown() {
+    var content = `<div class="selectdiv" style="margin:0"><label><select id="new-part-dropdown"><option value="" disabled selected>Ticket Number</option>`;
+    for(var key in OpenTickets) {
+        content += `<option value="${key}">#${key}</option>`;
+    }
+    content += '</select></label></div>';
+    return content;
+}
+
+function SubmitNewPartOrder() {
+    if(document.getElementById("new-part-desc").value == '') {
+        document.getElementById("new-part-desc-container").classList.add("error");
+        document.getElementById("new-part-desc").focus();
+    }
+    else {
+        var date = DateConvert(true);
+        var ticket = '';
+        if(document.getElementById("new-part-dropdown").value != '') ticket = parseInt(document.getElementById("new-part-dropdown").value);
+        var partObject = {Description : document.getElementById("new-part-desc").value, RepairNumber : '', 
+            Ticket : ticket, Tracking : ''};
+        Parts[date] = partObject;
+        db.ref("Parts/" + date).update(partObject);
     
+        popupInInput = false;
+        ClosePopup();
+        DrawIndividualParts();
+        console.log("Part added");
+    }
 }
-
-
-
-
-
-
-
-
 
 function DrawIndividualParts() {
     var content = `
@@ -78,12 +188,13 @@ function DrawIndividualParts() {
                 <div class="part-tracking-edit" onclick="EditTrackingNumber(${key})" tabindex="0">EDIT</div>
             `;
         }
-
+        var ticket = '<div class="part-ticket material-symbols-outlined"></div>';
+        if(Parts[key].Ticket != '') ticket = `<a href="#ticket-${Parts[key].Ticket}" class="part-ticket material-symbols-outlined">exit_to_app</a>`;
         content += `
             <div class="part-order-single-container">
-                <div class="checkbox material-symbols-outlined" onclick="OpenTicketCheckbox(this)"></div>
+                <div id="${key}" class="checkbox material-symbols-outlined" onclick="OpenTicketCheckbox(this)"></div>
                 <div class="part-date">${month + '/' + day + '/' + year}</div>
-                <a href="#ticket-${Parts[key].Ticket}" class="part-ticket material-symbols-outlined">exit_to_app</a>
+                ${ticket}
                 <div style="display: flex; flex: 1 0 0; min-width: 0; flex-wrap: wrap;">
                     <div class="part-description">${Parts[key].Description}</div>
                     <div class="part-tracking-container">
@@ -103,12 +214,16 @@ function DrawPartOrders() {
             <div class="object large">
                 <header class="gray">
                     <h1>ORDER LIST </h1>
-                    <button id="part-delete-button" class="icon-box hidden"><div class="material-symbols-outlined">delete</div></button>
-                    <button id="part-done-button" class="icon-box hidden"><div class="material-symbols-outlined">done</div></button>
-                    <button class="icon-box"><div class="material-symbols-outlined">add</div></button>
+                    <button id="part-delete-button" class="icon-box hidden" onclick="DeletePartOrders()"><div class="material-symbols-outlined">delete</div></button>
+                    <button id="part-done-button" class="icon-box hidden" onclick="CompletePartOrders()"><div class="material-symbols-outlined">done</div></button>
+                    <button class="icon-box" onclick="NewPartOrder()"><div class="material-symbols-outlined">add</div></button>
                 </header>
                 <div id="part-order-container" style="padding: 0 var(--inner-padding) var(--inner-padding) var(--inner-padding)"></div>
             </div>
+        </div>
+        <div id="popup-page" class="hidden" onclick="ClickToClosePopup(event)">
+            <div id="popup-x" class="material-symbols-outlined">close</div>
+            <div id="popup-container"></div>
         </div>
     `;
     $("#frame").html(content);

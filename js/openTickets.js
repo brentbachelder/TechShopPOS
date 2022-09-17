@@ -1,3 +1,6 @@
+var ticketsInProgress = {};
+var currentlyUsedStatuses = [];
+
 function InitOpenTickets() {
     document.getElementById("page-title").innerHTML = "OPEN TICKETS";
     document.getElementById("mobile-page-title").innerHTML = "OPEN TICKETS";
@@ -5,23 +8,33 @@ function InitOpenTickets() {
 }
 
 async function UpdateOpenTicketsList() {
-    var ticketsInProgress = {};
-    var currentlyUsedStatuses = [];
+    if(openTicketsChange) {
+        for(var key in ticketsInProgress) delete ticketsInProgress[key];
+        for(var ticketNum in OpenTickets) {
+            await db.ref("Tickets").child(ticketNum).once('value').then(snap => { 
+                var ticketResponse = snap.val();
+                //if(!currentlyUsedStatuses.includes(ticketResponse.Status)) currentlyUsedStatuses.push(ticketResponse.Status);
 
-    for(var ticketNum in OpenTickets) {
-        await db.ref("Tickets").child(ticketNum).once('value').then(snap => { 
-            var ticketResponse = snap.val();
-            if(!currentlyUsedStatuses.includes(ticketResponse.Status)) currentlyUsedStatuses.push(ticketResponse.Status);
-
-            var repairDescription = GetRepairDescription(ticketResponse);
-            var data = { "Name" : Customers[ticketResponse.Customer].Name, "Status" : ticketResponse.Status, "DateCreated" : 
-                ticketResponse.DateCreated, "Description" : repairDescription };
-            ticketsInProgress[ticketNum] = data;
-        });
+                var repairDescription = GetRepairDescription(ticketResponse);
+                var data = { "Name" : Customers[ticketResponse.Customer].Name, "Status" : ticketResponse.Status, "DateCreated" : 
+                    ticketResponse.DateCreated, "Description" : repairDescription };
+                ticketsInProgress[ticketNum] = data;
+            });
+        }
+        currentlyUsedStatuses = GetCurrentlyUsedStatuses();
+        openTicketsChange = false;
     }
     DrawOpenTickets();
     CreateStatusParents(currentlyUsedStatuses);
     DrawIndividualOpenTickets(ticketsInProgress);
+}
+
+function GetCurrentlyUsedStatuses() {
+    statuses = [];
+    for(var key in ticketsInProgress) {
+        if(!statuses.includes(ticketsInProgress[key].Status)) statuses.push(ticketsInProgress[key].Status);
+    }
+    return statuses;
 }
 
 function CreateStatusParents(statuses) {

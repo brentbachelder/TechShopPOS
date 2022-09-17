@@ -3,6 +3,7 @@ const firebaseConfig = { apiKey: "AIzaSyA2RDAkP6U-bivHEIauv6PsKKj9sMRFxqA",	auth
 const db = firebase.database();
 var finishedLoading = false;
 var postLoadingPage = "";
+var openTicketsChange = false;
 
 // Object variables for database information
 var Customers = {}, CustomerSearch = {}, TicketSearch = [], OpenTickets = {}, Settings = {}, Admin = {}, Prices = {}, Parts = {};
@@ -16,6 +17,7 @@ function InitializeApp() {
     db.ref("Customers").once('value').then(snap => {
         UpdateCustomerList(snap.val());
         finishedLoading = true;
+        document.getElementById("page-frame").classList.add("hidden"); // Remove loading Screen
         ChangePage(postLoadingPage);
         //Hide Loading Screen
     });
@@ -42,7 +44,7 @@ function UpdateCustomerList(snapshot) {
 // On value change listener for Open Tickets
 db.ref("OpenTickets").on('value', function (snap) {
     OpenTickets = snap.val();
-    if(currentPage == "open-tickets") UpdateOpenTicketsList();
+    openTicketsChange = true;
 });
 
 // On value change listener for Prices

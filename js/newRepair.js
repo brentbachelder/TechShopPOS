@@ -23,6 +23,10 @@ function InitNewRepair() {
     RestoreTemporary();
 }
 
+function NewTicketFromCustomerPage(custNum) {
+    InitNewRepair();
+    SelectNewTicketCustomer(custNum);
+}
 
 function FocusCustomerInput(id) {
     var undashed = id.replaceAll('-', ' ');
@@ -519,7 +523,6 @@ async function CreateNewTicket() {
     var ticketObject = {};
     ticketObject[ticketNumber] = ticketDescription
     await db.ref("Customers/" + newTicketCustomer + "/Tickets").update(ticketObject);
-    console.log(Customers[newTicketCustomer]);
 
     // Setting the local 'Customers' variable to match network without having to grab the whole snapshot again
     if(Customers.hasOwnProperty(newTicketCustomer)) {
@@ -559,6 +562,8 @@ async function CreateNewTicket() {
         repairInfo['DiscountPercent'] = 0;
         repairInfo['Quantity'] = 1;
         repairInfo['Display'] = undashed.substring(4);
+        repairInfo['Ordered'] = "Not Ordered";
+        repairInfo['OrderDate'] = '';
         
         masterRepair[i] = repairInfo;
         counter++;

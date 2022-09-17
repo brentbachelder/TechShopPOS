@@ -34,10 +34,10 @@ async function GetTicketInfo(num) {
     else {
         for (var key in CurrentInvoices) delete CurrentInvoices[key];
     }
-    DrawFunctions();          
+    DrawTicketFunctions();          
 }
 
-function DrawFunctions() {
+function DrawTicketFunctions() {
     DrawTicket();
     DrawTicketDetails();
     DrawCustomerDetails();
@@ -77,16 +77,18 @@ function TicketAddTax(element, repairNum) {
 }
 
 function AddToPartOrder(repairNum) {
-    var date = DateConvert();
+    var date = DateConvert(true);
     var partObject = {};
     partObject["Description"] = CurrentTicket.Device + " " + CurrentTicket.Type + " " + CurrentTicket.Repairs[repairNum].Display;
     partObject["RepairNumber"] = repairNum;
-    partObject["Status"] = "Not Ordered";
     partObject["Ticket"] = parseInt(ticketNumber);
     partObject["Tracking"] = '';
     db.ref("Parts/" + date).update(partObject);
+    db.ref("Tickets/" + ticketNumber + "/Repairs/" + repairNum + "/Ordered").set("Ordered");
+    db.ref("Tickets/" + ticketNumber + "/Repairs/" + repairNum + "/OrderDate").set(DateConvert());
     document.getElementById("part-order-" + repairNum).classList.add("ordered");
     document.getElementById("part-order-" + repairNum).innerHTML = "Part Ordered";
+    MessageCenter(`Added ${partObject["Description"]} to Parts List`, 4);
 }
 
 function RemoveRepair(repairNum) {
@@ -123,7 +125,7 @@ function UpdateRepair(element, repairNum, isPrice = false) {
     DrawTicketPaymentSummary();
 }
 
-function RefundInvoice(invoiceNumber) {
+function RefundInvoice(invoiceNumber, fromCustomer = false) {
     if(confirm("Refund this invoice?") == true) {
         var date = DateConvert(CurrentInvoices[invoiceNumber].FullDate);
         var year = date.substring(0,4);
@@ -132,8 +134,14 @@ function RefundInvoice(invoiceNumber) {
         var refundAmount = CurrentInvoices[invoiceNumber].Amount;
         db.ref("Invoices/" + year + "/" + month + "/" + day + "/" + invoiceNumber + "/" + "RefundAmount").set(refundAmount);
         CurrentInvoices[invoiceNumber].RefundAmount = refundAmount;
-        DrawTicketInvoices();
-        DrawTicketPaymentSummary();
+        if(fromCustomer) {
+            DrawCustomerSalesSummary();
+            DrawCustomerInvoices();
+        }
+        else {
+            DrawTicketInvoices();
+            DrawTicketPaymentSummary();
+        }
         var currentDaySales = Admin.PaymentTotals[year][month][day];
         Admin.PaymentTotals[year][month][day] = currentDaySales - refundAmount;
         db.ref("Admin/PaymentTotals/" + year + "/" + month + "/" + day).set(currentDaySales - refundAmount);
@@ -163,6 +171,7 @@ function CheckPopupEnter(event) {
             popupInInput = false;
             SubmitTicketAddPayment();
         }
+        else if(event.target.id == "tracking-number") SubmitTrackingNumber();
     }
 }
 
@@ -259,6 +268,7 @@ function SubmitTicketAddPayment() {
         invoiceDate = parseInt(invoiceDate);
         var invoiceObject = { Amount : amount, FullDate : invoiceDate, RefundAmount : 0, Ticket : parseInt(ticketNumber), Type : paymentType };
         db.ref("Invoices/" + year + "/" + month + "/" + day + "/" + Admin.CurrentInvoiceNumber).update(invoiceObject);
+        db.ref("Customers/" + CurrentTicket.Customer + "/Invoices").update({[Admin.CurrentInvoiceNumber] : invoiceDate});
         CurrentInvoices[Admin.CurrentInvoiceNumber] = invoiceObject;
         var currentDaySales = 0;
         if(Admin.PaymentTotals.hasOwnProperty(year) && Admin.PaymentTotals[year].hasOwnProperty(month) && Admin.PaymentTotals[year][month].hasOwnProperty(day)) {
@@ -428,9 +438,8 @@ function DrawTicketRepairs() {
         var checkSelected = '';
         if(CurrentTicket.Repairs[key].Tax) { tax = '+ tax'; checkSelected = ' selected'; }
         var partOrder = `<div id="part-order-${key}" class="ticket-part-text" tabindex="0" onclick="AddToPartOrder(${key}), event.stopPropagation()">Add to Parts</div>`;
-        for(var part in Parts) {
-            if(Parts[part].Ticket == ticketNumber && Parts[part].RepairNumber == key) partOrder = `<div id="part-order-${key}" class="ticket-part-text ordered">Part Ordered</div>`;
-        }
+        if(CurrentTicket.Repairs[key].Ordered == "Ordered") partOrder = `<div id="part-order-${key}" class="ticket-part-text ordered">Part Ordered</div>`;
+        else if(CurrentTicket.Repairs[key].Ordered == "Received") partOrder = `<div id="part-order-${key}" class="ticket-part-text ordered">Part Received</div>`;
         content += `
             <div class="ticket-repair-single">
                 <button class="ticket-repair-single-text" onclick="OpenTicketRepairDetails(this)">    
