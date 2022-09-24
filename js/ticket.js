@@ -144,6 +144,7 @@ function RefundInvoice(invoiceNumber, fromCustomer = false) {
         }
         var currentDaySales = Admin.PaymentTotals[year][month][day];
         Admin.PaymentTotals[year][month][day] = currentDaySales - refundAmount;
+        AddInvoiceToRecent(invoiceNumber);
         db.ref("Admin/PaymentTotals/" + year + "/" + month + "/" + day).set(currentDaySales - refundAmount);
         console.log(CurrentInvoices);
     }
@@ -213,7 +214,8 @@ function SubmitTicketAddRepair() {
             Price : parseFloat(document.getElementById("add-repair-price").value), Quantity : 1, Tax : hasTax };
         db.ref("Tickets/" + ticketNumber + "/Repairs/" + CurrentTicket.NextRepairNumber).update(repairObject);
         db.ref("Tickets/" + ticketNumber + "/NextRepairNumber").set(CurrentTicket.NextRepairNumber + 1);
-        CurrentTicket.Repairs[CurrentTicket.NextRepairNumber] = repairObject;
+        if('Repairs' in CurrentTicket) CurrentTicket.Repairs[CurrentTicket.NextRepairNumber] = repairObject;
+        else CurrentTicket['Repairs'] = {[CurrentTicket.NextRepairNumber]: repairObject};
         CurrentTicket.NextRepairNumber++;
         popupInInput = false;
         ClosePopup();
@@ -229,6 +231,7 @@ function TicketAddPayment() {
             <div class="header">PAYMENT AMOUNT<div class="popup-required">&nbsp;&nbsp;&nbsp;&nbsp;invalid amount</div></div>
             <input id="add-repair-payment" type="number" placeholder="0.00" onfocus="if(this.value == '0.00') this.value = ''" onkeydown="CheckPopupEnter(event)" 
                 onblur="if(this.value == '') this.value = '0.00'; popupInInput = false;" style="height: 80px; font-size: 28px; text-align: center;">
+            <div style="font-size: 14px; font-weight: 500; text-align: center; width: 100%;">Amount Owed: $${CurrentTicket.Balance.toFixed(2)}</div>
         </div>
         <div class="popup-switch">
             <div id="ticket-add-payment-card" class="popup-switch-single selected" tabindex="0" onclick="TicketAddPaymentSwitch(this, 'Card')"><div>CARD</div>
@@ -238,6 +241,7 @@ function TicketAddPayment() {
             <div id="ticket-add-payment-other" class="popup-switch-single" tabindex="0" onclick="TicketAddPaymentSwitch(this, 'Other')"><div>OTHER</div>
                 <div class="material-symbols-outlined">shopping_bag</div></div>
         </div>
+        
         <div style="width: 100%; text-align: center; margin-top: var(--outer-padding);">
             <button id="other-apply-button" onclick="SubmitTicketAddPayment()">Apply</button>
         </div>
@@ -261,7 +265,7 @@ function SubmitTicketAddPayment() {
     amount = parseFloat(amount);
     amount = Math.floor(amount * 100) / 100;
     if(amount > 0 && amount <= CurrentTicket.Balance) {
-        var invoiceDate = DateConvert();
+        var invoiceDate = DateConvert(true);
         var year = invoiceDate.substring(0,4);
         var month = invoiceDate.substring(4,6);
         var day = invoiceDate.substring(6, 8);
@@ -278,6 +282,7 @@ function SubmitTicketAddPayment() {
         db.ref("Tickets/" + ticketNumber + "/Invoices/" + Admin.CurrentInvoiceNumber).set(invoiceDate);
         if(CurrentTicket.hasOwnProperty('Invoices')) CurrentTicket.Invoices[Admin.CurrentInvoiceNumber] = invoiceDate;
         else CurrentTicket['Invoices'] = { [Admin.CurrentInvoiceNumber] : invoiceDate };
+        AddInvoiceToRecent(Admin.CurrentInvoiceNumber);
         db.ref("Admin/CurrentInvoiceNumber").set(Admin.CurrentInvoiceNumber + 1);
         ClosePopup();
         DrawTicketPaymentSummary();

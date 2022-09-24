@@ -164,12 +164,16 @@ function CheckTicketResult() {
 // Go to the page from results
 function OpenCustomerPageFromSearch(num) {
     CloseSearch();
-    console.log("Going to page " + num);
+    var url = window.location.toString();
+    url = url.split('#')[0];
+    location.href = url + '#customer-' + num;
 }
 
 function OpenTicketPageFromSearch(num) {
     CloseSearch();
-    console.log("Goint to ticket page " + num);
+    var url = window.location.toString();
+    url = url.split('#')[0];
+    location.href = url + '#ticket-' + num;
 }
 
 

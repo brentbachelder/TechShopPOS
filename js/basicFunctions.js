@@ -37,14 +37,6 @@ function ChangePage(newPage) {
             else if(newPage == "parts") InitPartOrders();
             else if(newPage == "pos") InitPos();
             else if(newPage == "reports") InitReports();
-            else if(newPage.includes("customer"))  {
-                var pageID = newPage.split('-')[1];
-                InitCustomer(pageID);
-            }
-            else if(newPage.includes("ticket"))  {
-                var pageID = newPage.split('-')[1];
-                InitTicket(pageID);
-            }
             else if(newPage.includes("settings")) {
                 if(document.getElementById("menu-settings").classList.contains("hidden")) {
                     document.getElementById("menu-settings").classList.remove("hidden");
@@ -52,6 +44,14 @@ function ChangePage(newPage) {
                 }
                 const after = newPage.substring(newPage.indexOf('-') + 1);
                 InitSettings(after);
+            }
+            else if(newPage.includes("customer"))  {
+                var pageID = newPage.split('-')[1];
+                InitCustomer(pageID);
+            }
+            else if(newPage.includes("ticket"))  {
+                var pageID = newPage.split('-')[1];
+                InitTicket(pageID);
             }
             else InitDashboard();
 
@@ -258,17 +258,78 @@ function ApplyStatusChange(ticket, status) {
     if(status == "Completed") {
         db.ref('OpenTickets/' + ticket).remove();
         delete ticketsInProgress[ticket];
+        AddTicketToRecentlyCompleted(ticket);
+        delete ticketsInProgress[ticket];
     }
     else {
         db.ref('OpenTickets/' + ticket).set(status);
-        ticketsInProgress[ticket].Status = status;
-        currentlyUsedStatuses = GetCurrentlyUsedStatuses();
+        if(ticket in ticketsInProgress) ticketsInProgress[ticket].Status = status;
+        for(var key in Admin.RecentlyCompletedTickets) {
+            if(Admin.RecentlyCompletedTickets[key] == ticket) db.ref('Admin/RecentlyCompletedTickets/' + key).remove();
+        }
     }
+    currentlyUsedStatuses = GetCurrentlyUsedStatuses();
     if(currentPage == "open-tickets") {
         DrawOpenTickets();
         CreateStatusParents(currentlyUsedStatuses);
         DrawIndividualOpenTickets(ticketsInProgress);
     }
+}
+
+function CompleteTicket(ticket) {
+    db.ref('Tickets/' + ticket).update({Status: "Completed"});
+    db.ref('OpenTickets/' + ticket).remove();
+    AddTicketToRecentlyCompleted(ticket);
+}
+
+function AddTicketToRecentlyCompleted(ticket) {
+    var date = parseInt(DateConvert(true));
+    if('RecentlyCompletedTickets' in Admin) {
+        if(Object.keys(Admin.RecentlyCompletedTickets).length < 15) db.ref('Admin/RecentlyCompletedTickets').update({[date] : ticket});
+        else {
+            Admin.RecentlyCompletedTickets[date] = ticket;
+            var rct = GetDescending(Admin.RecentlyCompletedTickets, 15);
+            var newRct = {};
+            for(var outer in rct) {
+                for(var key in rct[outer]) {
+                    newRct[key] = rct[outer][key];
+                }
+            }
+            db.ref('Admin/RecentlyCompletedTickets').set(newRct);
+        }
+    }
+    else db.ref('Admin/RecentlyCompletedTickets').update({[date] : ticket});
+}
+
+function AddInvoiceToRecent(invoiceNum) {
+    var date = parseInt(DateConvert(true));
+    if('RecentInvoices' in Admin) {
+        var alreadyIn = false;
+        for(var key in Admin.RecentInvoices) {
+            if(Admin.RecentInvoices[key] == invoiceNum) {
+                delete Admin.RecentInvoices[key];
+                db.ref('Admin/RecentInvoices/' + key).remove();
+                db.ref('Admin/RecentInvoices').update({[date] : invoiceNum});
+                alreadyIn = true;
+                console.log("refunded");
+            }
+        }
+        if(!alreadyIn) {
+            if(Object.keys(Admin.RecentInvoices).length < 10) db.ref('Admin/RecentInvoices').update({[date] : invoiceNum});
+            else {
+                Admin.RecentInvoices[date] = invoiceNum;
+                var rct = GetDescending(Admin.RecentInvoices, 10);
+                var newRct = {};
+                for(var outer in rct) {
+                    for(var key in rct[outer]) {
+                        newRct[key] = rct[outer][key];
+                    }
+                }
+                db.ref('Admin/RecentInvoices').set(newRct);
+            }
+        }
+    }
+    else db.ref('Admin/RecentInvoices').update({[date] : invoiceNum});
 }
 
 
@@ -301,4 +362,20 @@ function MessageCenter(message, secondCount) {
 function TwoDigit(number) {
     var x = Math.pow(10, Number(2) + 1);
     return (Number(number) + (1 / x)).toFixed(2);
+}
+
+// Get object by descending order
+function GetDescending(obj, returnQuantity = -1) {
+    let sortable = [];
+    var returnObject = {};
+
+    for (var key in obj) {
+        sortable.push([key]);
+    }
+    sortable.sort((a, b) => (b - a));
+    if(returnQuantity != -1 && sortable.length > returnQuantity) sortable.length = returnQuantity;
+    for(var i = 0; i < sortable.length; i++) {
+        returnObject[i] = { [sortable[i]] : obj[sortable[i]] };
+    }
+    return returnObject;
 }

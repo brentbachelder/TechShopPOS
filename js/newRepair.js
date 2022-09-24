@@ -24,6 +24,9 @@ function InitNewRepair() {
 }
 
 function NewTicketFromCustomerPage(custNum) {
+    var url = window.location.toString();
+    url = url.split('#')[0];
+    location.href = url + '#new-repair';
     InitNewRepair();
     SelectNewTicketCustomer(custNum);
 }
@@ -546,7 +549,7 @@ async function CreateNewTicket() {
         var repairInfo = {};
         var taxPrice = 0;
         var undashed = repairList[i].replaceAll('-', ' ');
-        if(Prices.hasOwnProperty(selectedDevice) && Prices[selectedDevice].hasOwnProperty(selectedType)) {
+        if(Prices.hasOwnProperty(selectedDevice) && Prices[selectedDevice].hasOwnProperty(selectedType) && Prices[selectedDevice][selectedType].hasOwnProperty(undashed)) {
             var price = Prices[selectedDevice][selectedType][undashed].Price;
             if(Prices[selectedDevice][selectedType][undashed].Tax) price = price + (price * (Settings.General.SalesTax / 100));
             taxPrice = Math.round(price * 100) / 100;
@@ -625,7 +628,28 @@ async function CreateNewTicket() {
     await db.ref("Admin/CurrentCustomerNumber").set(Admin.CurrentCustomerNumber + 1);
     await db.ref("Admin/CurrentTicketNumber").set(Admin.CurrentTicketNumber + 1);
     
+    var date = DateConvert(true);
+    var year = date.substring(0,4);
+    var month = date.substring(4,6);
+    var day = date.substring(6, 8);
+    
     await db.ref("OpenTickets/" + ticketNumber).set(ticketInfo['Status']);
+    var newTicketCount = 0;
+    if('NewTicketCount' in Admin && year in Admin.NewTicketCount && month in Admin.NewTicketCount[year] && day in Admin.NewTicketCount[year][month]) newTicketCount = Admin.NewTicketCount[year][month][day];
+    await db.ref("Admin/NewTicketCount/" + year + "/" + month ).update({[day] : newTicketCount + 1});
+
+    var inPrices = false;
+    var newDevice = selectedDevice.substring(4);
+    var newType = selectedType.substring(4);
+    for(var key in Prices) {
+        if(key === selectedDevice) inPrices = true;
+    }
+    if(!inPrices) { newDevice = 'Other'; newType = selectedDevice.substring(4) + ' ' + newType; }
+    var typeCount = 0;
+    if('TypeCounts' in Admin && year in Admin.TypeCounts && newDevice in Admin.TypeCounts[year] && newType in Admin.TypeCounts[year][newDevice])
+        typeCount = Admin.TypeCounts[year][newDevice][newType];
+    db.ref("Admin/TypeCounts/" + year + "/" + newDevice).update({[newType] : typeCount + 1});
+
     ClearTemporary();
     window.location = "#ticket-" + ticketNumber;
 }

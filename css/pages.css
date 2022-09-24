@@ -4,10 +4,10 @@
     font-weight: 700; padding: var(--inner-padding); }
 .open-ticket-container:last-child { border-bottom: 0; border-radius: 0 0 var(--border-radius) var(--border-radius); }
 .object .info-container { display: flex; flex-direction: column; }
-.open-ticket-container .ticket-num {  color: var(--default); width: 86px; height: 100%; display: flex; align-items: center; }
+.open-ticket-container .ticket-num {  color: var(--default); width: 86px; min-width: 86px; height: 100%; display: flex; align-items: center; }
 .open-ticket-container .name-device { width: calc(100% - 326px); display: flex; flex-direction: column; }
-.open-ticket-container .name-device > .name { color: var(--default); }
-.open-ticket-container .name-device > .device { font-size: 12px; font-weight: 400; color: var(--description); }
+.open-ticket-container .name-device > .name { width: 100%; max-width: 100%; color: var(--default); }
+.open-ticket-container .name-device > .device { width: 100%; max-width: 100%; font-size: 12px; font-weight: 400; color: var(--description); }
 .open-ticket-container .clock-date { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 14px; width: 80px; height: 100%; }
 .open-ticket-container .clock-date > .material-symbols-outlined { font-size: 18px; color: var(--description); }
 .open-ticket-container .clock-date > .date { font-size: 10px; font-weight: 400; color: var(--description); }
@@ -294,9 +294,36 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 .slider-notch { height: 100%; width: 6px; border-radius: 3px; background-color: #e4e4e4; }
 .rating-note { width: 100%; height: 100px; padding: var(--inner-padding); border-radius: var(--border-radius); font-size: 14px; resize: none; border: 2px solid var(--text-hover); }
 .rating-note:placeholder-shown { background-color: var(--input-background); border-color: var(--select); }
-.rating-note:focus { background-color: transparent; border-color: var(--text-hover); }
+.rating-note:focus { background-color: transparent; border-color: var(--text-hover); } 
 
 @media (hover:hover) {
     .customer-ticket-container:hover { background-color: var(--hover); }
     /*.slider::-webkit-slider-thumb:hover { opacity: 1; background-color: var(--text-hover); }*/
+}
+
+
+
+
+/* || REPORTS & INVOICES ||
+/*  Chart   */
+#sales-chart { width: 100%; height: 300px; max-height: 300px; }
+
+@media (hover:hover) {
+    #sales-toggle-button:hover, #basis-toggle-button:hover { cursor: pointer; }
+}
+
+
+
+
+/* || DASHBOARD ||
+/*  Chart & Legend   */
+#chart-legend-container { display: flex; align-items: center; flex-wrap: wrap; width: 100%; margin-top: var(--outer-padding); justify-content: center; gap: var(--inner-padding); }
+.legend-entry { width: max(calc(33% - 48px), 150px); height: 40px; display: flex; align-items: center; gap: 12px; }
+.legend-entry-box { width: 16px; height: 16px; border: 3px solid; box-shadow: var(--shadow) 0 0 6px; background-color: transparent; }
+.legend-entry-text { font-size: 14px; font-weight: 700; }
+.number-percent-switch { width: 50%; height: 100%; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: 700; }
+.number-percent-switch.selected { background-color: var(--hover); }
+
+@media (hover:hover) {
+    .number-percent-switch:hover { cursor: pointer; }
 }
