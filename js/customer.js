@@ -13,7 +13,7 @@ async function GetCustomerInfo() {
         CurrentCustomer = snap.val();
     });
 
-    if('Invoices' in CurrentCustomer) {
+    if(CurrentCustomer != null && 'Invoices' in CurrentCustomer) {
         for(var key in CurrentCustomer.Invoices) {
             var invoiceDate = CurrentCustomer.Invoices[key].toString();
             var year = invoiceDate.substring(0,4);
@@ -64,7 +64,8 @@ function GetRatingNumberInText(rating) {
 function UpdateCustomerNote() {
     var note = document.getElementById("customer-note").value;
     CurrentCustomer["Note"] = note;
-    db.ref("Customers/" + customerNumber + "/Note").set(note);
+    if(note != '') db.ref("Customers/" + customerNumber + "/Note").set(note);
+    else db.ref("Customers/" + customerNumber + "/Note").remove();
 }
 
 function RememberCustomerInput(id) {
@@ -76,7 +77,8 @@ function UpdateCustomerInput(id, required = false) {
     if(required && document.getElementById(id).value == '') document.getElementById(id).value = rememberedInput;
     var text = document.getElementById(id).value;
     CurrentCustomer[undashed] = text;
-    db.ref("Customers/" + customerNumber + "/" + undashed).set(text);
+    if(text != '') db.ref("Customers/" + customerNumber + "/" + undashed).set(text);
+    else db.ref("Customers/" + customerNumber  + "/" + undashed).remove();
 }
 
 
@@ -110,19 +112,15 @@ function DrawCustomerInvoices() {
             else if(CurrentInvoices[key].Type == "Cash") type = 'payments';
             var date = CurrentInvoices[key].FullDate.toString();
             var datePrinted = date.substring(4,6) + "/" + date.substring(6, 8) + "/" + date.substring(2,4);
-            var color = 'var(--default)';
-            var refund = `<div id="refund-${key}" class="invoice-refund-text" onclick="RefundInvoice(${key}, true)">Refund</div>`;
-            if(CurrentInvoices[key].RefundAmount > 0) {
-                refund = `<div style="font-size: 10px; text-align: right;">REFUNDED</div>`;
-                color = 'darkred';
-            }
+            var note = '';
+            if("Note" in CurrentInvoices[key] && CurrentInvoices[key].Note != '') note = `&nbsp;&nbsp(${CurrentInvoices[key].Note})`
             
             content += `
-                <div style="display: flex; width: 100%; align-items:center; padding: var(--inner-padding) calc(100% / 20); gap: calc(100% / 20); color: ${color};">
+                <div style="display: flex; width: 100%; align-items:center; padding: var(--inner-padding) calc(100% / 20); gap: calc(100% / 20); color: var(--default);">
                     <div style="width: 24px;" class="material-symbols-outlined">${type}</div>
                     <div style="width: 84px; text-align: center;">${datePrinted}</div>
-                    <div style="width: 80px; font-weight: 700; flex-grow: 1;">$${CurrentInvoices[key].Amount.toFixed(2)}</div>
-                    ${refund}
+                    <div style="width: 80px; flex-grow: 1;"><b>$${CurrentInvoices[key].Amount.toFixed(2)}</b>${note}</div>
+                    <a href="#ticket-${CurrentInvoices[key].Ticket}" class="customer-invoice-link">#${CurrentInvoices[key].Ticket}</a>
                 </div>
             `;
         }
@@ -134,7 +132,9 @@ function DrawCustomerInvoices() {
 function DrawCustomerSalesSummary() {
     var tickets = Object.keys(CurrentCustomer.Tickets).length;
     var sales = 0;
-    for(var key in CurrentInvoices) sales += CurrentInvoices[key].Amount - CurrentInvoices[key].RefundAmount;
+    if(CurrentInvoices != null) {
+        for(var key in CurrentInvoices) sales += CurrentInvoices[key].Amount;
+    }
 
     var content = `
         <div style="display: flex; width: 100%;">
@@ -199,35 +199,42 @@ function DrawCustomerInfo() {
             }
             
             if(display != "Temp Phone" && display != "Address") {
+                var result = '';
+                if(CurrentCustomer[display] != undefined) result = CurrentCustomer[display];
                 content += `
                 <div style="display: flex; width: 100%; flex-wrap: wrap; padding: 0 5%; margin-bottom: calc(var(--inner-padding) / 2);">                   
                     <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
                         <div style="font-size: 12px; font-weight: 700; width: 175px; padding-left: calc(var(--inner-padding) / 2);">${display}${requiredStar}</div>
-                        <input id="${dashed}" class="customer-details-input" placeholder=" " onkeydown="OnEnterBlur(event)" value="${CurrentCustomer[display]}"${focus}>
+                        <input id="${dashed}" class="customer-details-input" placeholder=" " onkeydown="OnEnterBlur(event)" value="${result}"${focus}>
                     </div>
                 </div>
                 `;
             }
             else if(display == "Address") {
+                var address = '', city = '', state = '', zip = '';
+                if(CurrentCustomer["Address"] != undefined) address = CurrentCustomer["Address"];
+                if(CurrentCustomer["City"] != undefined) city = CurrentCustomer["City"];
+                if(CurrentCustomer["State"] != undefined) state = CurrentCustomer["State"];
+                if(CurrentCustomer["Zip"] != undefined) zip = CurrentCustomer["Zip"];
                 content += `
                 <div style="display: flex; width: 100%; flex-wrap: wrap; padding: 0 5%; margin-bottom: calc(var(--inner-padding) / 2);">                   
                     <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
                         <div style="font-size: 12px; font-weight: 700; width: 175px; padding-left: calc(var(--inner-padding) / 2);">${display}${requiredStar}</div>
-                        <input id="Address" class="customer-details-input" placeholder=" " onkeydown="OnEnterBlur(event)" value="${CurrentCustomer[display]}"${focus}>
+                        <input id="Address" class="customer-details-input" placeholder=" " onkeydown="OnEnterBlur(event)" value="${address}"${focus}>
                     </div>
                 </div>
                 <div style="display: flex; width: 100%; flex-wrap: wrap; gap: var(--inner-padding); padding: 0 5%; margin-bottom: calc(var(--inner-padding) / 2);">                   
                     <div style="display: flex; flex-direction: column; gap: 8px; flex: 1 0 0;">
                         <div style="font-size: 12px; font-weight: 700; width: 175px; padding-left: calc(var(--inner-padding) / 2);">City</div>
-                        <input id="City" class="customer-details-input" placeholder=" " onkeydown="OnEnterBlur(event)" value="${CurrentCustomer["City"]}" onblur="UpdateCustomerInput(this.id)">
+                        <input id="City" class="customer-details-input" placeholder=" " onkeydown="OnEnterBlur(event)" value="${city}" onblur="UpdateCustomerInput(this.id)">
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 8px; width: 84px;">
                         <div style="font-size: 12px; font-weight: 700; width: 175px; padding-left: calc(var(--inner-padding) / 2);">ST</div>
-                        <input id="State" class="customer-details-input" placeholder=" " onkeydown="OnEnterBlur(event)" value="${CurrentCustomer["State"]}" onblur="UpdateCustomerInput(this.id)">
+                        <input id="State" class="customer-details-input" placeholder=" " onkeydown="OnEnterBlur(event)" value="${state}" onblur="UpdateCustomerInput(this.id)">
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 8px; width: 160px;">
                         <div style="font-size: 12px; font-weight: 700; width: 175px; padding-left: calc(var(--inner-padding) / 2);">Zip</div>
-                        <input id="Zip" class="customer-details-input" placeholder=" " onkeydown="OnEnterBlur(event)" value="${CurrentCustomer["Zip"]}" onblur="UpdateCustomerInput(this.id)">
+                        <input id="Zip" class="customer-details-input" placeholder=" " onkeydown="OnEnterBlur(event)" value="${zip}" onblur="UpdateCustomerInput(this.id)">
                     </div>
                 </div>
                 `;

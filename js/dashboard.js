@@ -211,8 +211,10 @@ function DrawCurrentStatus() {
     var month = date.substring(4,6);
     var day = date.substring(6, 8);
     var sales = 0;
-    if(year in Admin.PaymentTotals && month in Admin.PaymentTotals[year] && day in Admin.PaymentTotals[year][month]) sales = Admin.PaymentTotals[year][month][day];
-    var tickets = Object.keys(OpenTickets).length;
+    if("PaymentTotals" in Admin &&year in Admin.PaymentTotals && month in Admin.PaymentTotals[year] && day in Admin.PaymentTotals[year][month]) 
+        sales = Admin.PaymentTotals[year][month][day];
+    var tickets = 0;
+    if(OpenTickets != null) tickets = Object.keys(OpenTickets).length;
     
     var content = `
     <div style="display: flex; width: 100%; height: calc((383px - 108px - 32px) * .5); justify-content: center; align-items: center; text-align: center;">
@@ -243,7 +245,7 @@ function DrawRecentOpenTickets() {
             </div>
         </a>`;
     }
-    document.getElementById('recent-tickets-container').innerHTML = content;
+    if(content != '') document.getElementById('recent-tickets-container').innerHTML = content;
 }
 
 function DrawDashboard() {
@@ -270,7 +272,7 @@ function DrawDashboard() {
             <header class="gray">
                 <h1>RECENT OPEN TICKETS</h1>
             </header>
-            <div id="recent-tickets-container"></div>
+            <div id="recent-tickets-container"><div class="default-none">- NO OPEN TICKETS -</div></div>
         </div>
         <div class="object medium">
             <header class="gray">
@@ -292,7 +294,7 @@ function DrawDashboard() {
                 <h1>NOTES</h1>
                 <button class="icon-box" onclick="TicketAddNote()"><div class="material-symbols-outlined">add</div></button>
             </header>
-            <div id="ticket-notes"></div>
+            <div id="ticket-notes"><div class="default-none">- NO NOTES -</div></div>
         </div>
     </div>
     `;

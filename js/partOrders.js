@@ -32,7 +32,6 @@ function OpenTicketCheckbox(element) {
             selectedCheckboxes.push(selectedBoxes[i].id);
         }
     }
-    console.log(selectedCheckboxes);
 
     if(counter > 0) {
         document.getElementById("part-delete-button").classList.remove("hidden");
@@ -152,13 +151,13 @@ function SubmitNewPartOrder() {
         if(document.getElementById("new-part-dropdown").value != '') ticket = parseInt(document.getElementById("new-part-dropdown").value);
         var partObject = {Description : document.getElementById("new-part-desc").value, RepairNumber : '', 
             Ticket : ticket, Tracking : ''};
-        Parts[date] = partObject;
+        if(Parts != null) Parts[date] = partObject;
+        else Parts = {[date] : partObject};
         db.ref("Parts/" + date).update(partObject);
     
         popupInInput = false;
         ClosePopup();
         DrawIndividualParts();
-        console.log("Part added");
     }
 }
 
@@ -218,7 +217,18 @@ function DrawPartOrders() {
                     <button id="part-done-button" class="icon-box hidden" onclick="CompletePartOrders()"><div class="material-symbols-outlined">done</div></button>
                     <button class="icon-box" onclick="NewPartOrder()"><div class="material-symbols-outlined">add</div></button>
                 </header>
-                <div id="part-order-container" style="padding: 0 var(--inner-padding) var(--inner-padding) var(--inner-padding)"></div>
+                <div id="part-order-container" style="padding: 0 var(--inner-padding) var(--inner-padding) var(--inner-padding)">
+                    <div id="part-order-header" class="part-order-single-container" style="font-size: 10px; font-weight: 700;">
+                        <div style="width: 40px;"></div>
+                        <div class="part-date">ORDER DATE</div>
+                        <div class="part-ticket">GO TO<br />TICKET</div>
+                        <div style="display: flex; flex: 1 0 0; min-width: 0; flex-wrap: wrap;">
+                            <div class="part-description" style="padding-left: var(--inner-padding)">DESCRIPTION</div>
+                            <div class="part-tracking-container">TRACKING #</div>
+                        </div>
+                    </div>
+                    <div class="default-none">- NO PART ORDERS -</div>
+                </div>
             </div>
         </div>
         <div id="popup-page" class="hidden" onclick="ClickToClosePopup(event)">

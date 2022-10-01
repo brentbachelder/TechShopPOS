@@ -37,6 +37,25 @@ function ChangePage(newPage) {
             else if(newPage == "parts") InitPartOrders();
             else if(newPage == "pos") InitPos();
             else if(newPage == "reports") InitReports();
+            else if(newPage.includes("custom-invoice")) {
+                var startCustom = newPage.substring(newPage.indexOf("?") + 1, newPage.lastIndexOf("&"));
+                var endCustom = newPage.split('&')[1];
+                InitCustomInvoice(startCustom, endCustom);
+            }
+            else if(newPage.includes("invoices")) {
+                if(newPage.includes("?page")) {
+                    var page = newPage.substring(13);
+                    InitInvoices(page);
+                }
+                else InitInvoices();
+            }
+            else if(newPage.includes("completed-tickets")) {
+                if(newPage.includes("?page")) {
+                    var page = newPage.substring(22);
+                    InitCompletedTickets(page);
+                }
+                else InitCompletedTickets();
+            }
             else if(newPage.includes("settings")) {
                 if(document.getElementById("menu-settings").classList.contains("hidden")) {
                     document.getElementById("menu-settings").classList.remove("hidden");
@@ -285,10 +304,10 @@ function CompleteTicket(ticket) {
 function AddTicketToRecentlyCompleted(ticket) {
     var date = parseInt(DateConvert(true));
     if('RecentlyCompletedTickets' in Admin) {
-        if(Object.keys(Admin.RecentlyCompletedTickets).length < 15) db.ref('Admin/RecentlyCompletedTickets').update({[date] : ticket});
+        if(Object.keys(Admin.RecentlyCompletedTickets).length < 100) db.ref('Admin/RecentlyCompletedTickets').update({[date] : ticket});
         else {
             Admin.RecentlyCompletedTickets[date] = ticket;
-            var rct = GetDescending(Admin.RecentlyCompletedTickets, 15);
+            var rct = GetDescending(Admin.RecentlyCompletedTickets, 100);
             var newRct = {};
             for(var outer in rct) {
                 for(var key in rct[outer]) {

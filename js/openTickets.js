@@ -8,7 +8,7 @@ function InitOpenTickets() {
 }
 
 async function UpdateOpenTicketsList() {
-    if(openTicketsChange) {
+    if(openTicketsChange && OpenTickets != null) {
         for(var key in ticketsInProgress) delete ticketsInProgress[key];
         for(var ticketNum in OpenTickets) {
             await db.ref("Tickets").child(ticketNum).once('value').then(snap => { 
@@ -52,7 +52,7 @@ function CreateStatusParents(statuses) {
             </div>
         `;
     }
-    document.getElementById("open-ticket-container").innerHTML = content;
+    if(content != '') document.getElementById("open-ticket-container").innerHTML = content;
 }
 
 function DrawIndividualOpenTickets(ticketsInProgress) {
@@ -82,7 +82,16 @@ function DrawIndividualOpenTickets(ticketsInProgress) {
 
 function DrawOpenTickets() {
     var content = `
-        <div id="open-ticket-container" class="container"></div>
+        <div class="container">
+            <div id="open-ticket-container" class="container">
+                <div class="object large">
+                    <header class="gray">
+                        <h1>ALL TICKETS</h1>
+                    </header>
+                    <div class="default-none">- NO OPEN TICKETS -</div>
+                </div>    
+            </div>
+        </div>
     `;
     $("#frame").html(content);
 }

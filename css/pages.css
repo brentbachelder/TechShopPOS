@@ -170,6 +170,8 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 /*  Invoices & Payment Summary   */
 #ticket-right-column .object.medium { flex: 1 1 0; min-width: 270px; }
 .invoice-refund-text { font-size: 12px; color: darkred; width: 60px; text-align: right; }
+#reference-note { flex-grow: 1; height: 28px; border: 2px solid var(--default); border-radius: calc(var(--border-radius) / 2); padding: 0 8px; }
+#reference-note:placeholder-shown { border-color: var(--input-border);}
 
 /*  Popup Page  */
 #popup-page { position: absolute; width: 100vw; height: 100vh; top: 0; left: 0; background-color: var(--search-background); display: flex; 
@@ -279,6 +281,8 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
     border-bottom: 1px solid var(--select); }
 .customer-ticket-container:last-of-type { border-bottom: 0; }
 .customer-ticket-link { width: 86px; text-decoration: underline; }
+.customer-invoice-link { width: 80px; color: darkred; text-align: center; font-size: 12px; font-weight: 700; };
+
 
 /*  Rating  */
 .slider-container { width: 100%; display: flex; justify-content: center; align-items: center; padding: 0 4% var(--inner-padding) 4%; flex-direction: column; }
@@ -298,6 +302,7 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 
 @media (hover:hover) {
     .customer-ticket-container:hover { background-color: var(--hover); }
+    .customer-invoice-link:hover { text-decoration: underline; }
     /*.slider::-webkit-slider-thumb:hover { opacity: 1; background-color: var(--text-hover); }*/
 }
 
@@ -307,9 +312,22 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 /* || REPORTS & INVOICES ||
 /*  Chart   */
 #sales-chart { width: 100%; height: 300px; max-height: 300px; }
+.customer-name-link { flex-grow: 1; text-align: left; }
+.invoice-list-amount { width: 80px; font-weight: 700; text-align: center; }
+
+/* Custom Invoice Search, Recent Invoices and Recent Completed Tickets */
+.custom-invoice-date { width: 100%; height: 40px; border-radius: var(--border-radius); font-size: 14px; padding: 0 var(--inner-padding);}
+.recent-invoices-ticket-num { width: 50px; font-weight: 700; font-size: 12px; text-align: center; color: darkgreen; }
+
+@media (max-width: 600px) {
+    .customer-name-link { display: none; }
+    .invoice-list-amount { flex-grow: 1; }
+}
 
 @media (hover:hover) {
     #sales-toggle-button:hover, #basis-toggle-button:hover { cursor: pointer; }
+    a.customer-name-link:hover { text-decoration: underline; }
+    .recent-invoices-ticket-num:hover { text-decoration: underline; }
 }
 
 

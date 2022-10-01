@@ -367,7 +367,7 @@ function DrawRepairs() {
     document.getElementById("input-repair-repairs").classList.remove("hidden");
     
     var content = '';
-    if(Prices.hasOwnProperty(selectedDevice)) {
+    if(Prices != null && selectedDevice in Prices) {
         if(Prices[selectedDevice].hasOwnProperty(selectedType)) {
             for(var key in Prices[selectedDevice][selectedType]) {
                 var dashed = key.replaceAll(' ', '-');
@@ -510,11 +510,13 @@ async function CreateNewTicket() {
         if(Settings.Customers.Inputs[key].Enabled) {
             var dashed = Settings.Customers.Inputs[key].Display.replaceAll(' ', '-');
             if(Settings.Customers.Inputs[key].Display == "Temp Phone") tempPhone = document.getElementById(dashed).value;
-            else custInfo[Settings.Customers.Inputs[key].Display] = document.getElementById(dashed).value;
+            else {
+                if(document.getElementById(dashed).value != '') custInfo[Settings.Customers.Inputs[key].Display] = document.getElementById(dashed).value;
+            }
             if(Settings.Customers.Inputs[key].Display == "Address") {
-                custInfo["City"] = document.getElementById("City").value;
-                custInfo["State"] = document.getElementById("State").value;
-                custInfo["Zip"] = document.getElementById("Zip").value;
+                if(document.getElementById("City").value != '') custInfo["City"] = document.getElementById("City").value;
+                if(document.getElementById("State").value != '') custInfo["State"] = document.getElementById("State").value;
+                if(document.getElementById("Zip").value != '') custInfo["Zip"] = document.getElementById("Zip").value;
             }
         }
     }
@@ -528,7 +530,7 @@ async function CreateNewTicket() {
     await db.ref("Customers/" + newTicketCustomer + "/Tickets").update(ticketObject);
 
     // Setting the local 'Customers' variable to match network without having to grab the whole snapshot again
-    if(Customers.hasOwnProperty(newTicketCustomer)) {
+    if(Customers != null && Customers.hasOwnProperty(newTicketCustomer)) {
         for(var checkKey in custInfo) {
             if(Customers[newTicketCustomer][checkKey] != custInfo[checkKey] || !Customers[newTicketCustomer].hasOwnProperty(checkKey)) 
                 Customers[newTicketCustomer][checkKey] = custInfo[checkKey];
@@ -536,7 +538,8 @@ async function CreateNewTicket() {
         Object.assign(Customers[newTicketCustomer].Tickets, ticketObject);
     }
     else {
-        Customers[newTicketCustomer] = custInfo;
+        if(Customers != null) Customers[newTicketCustomer] = custInfo;
+        else Customers = {[newTicketCustomer] : custInfo };
         Customers[newTicketCustomer]["Tickets"] = ticketObject;
     }
     console.log(Customers[newTicketCustomer]);

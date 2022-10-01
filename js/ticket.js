@@ -127,13 +127,29 @@ function UpdateRepair(element, repairNum, isPrice = false) {
 
 function RefundInvoice(invoiceNumber, fromCustomer = false) {
     if(confirm("Refund this invoice?") == true) {
-        var date = DateConvert(CurrentInvoices[invoiceNumber].FullDate);
-        var year = date.substring(0,4);
-        var month = date.substring(4,6);
-        var day = date.substring(6, 8);
-        var refundAmount = CurrentInvoices[invoiceNumber].Amount;
-        db.ref("Invoices/" + year + "/" + month + "/" + day + "/" + invoiceNumber + "/" + "RefundAmount").set(refundAmount);
-        CurrentInvoices[invoiceNumber].RefundAmount = refundAmount;
+        var amount = CurrentInvoices[invoiceNumber].Amount * -1;
+        var invoiceDate = DateConvert(true);
+        var year = invoiceDate.substring(0,4);
+        var month = invoiceDate.substring(4,6);
+        var day = invoiceDate.substring(6, 8);
+        invoiceDate = parseInt(invoiceDate);
+        var invoiceObject;
+        invoiceObject = { Amount : amount, FullDate : invoiceDate, Ticket : parseInt(ticketNumber), Type : CurrentInvoices[invoiceNumber].Type, Customer: CurrentTicket.Customer, Refunded : true };
+        db.ref("Invoices/" + year + "/" + month + "/" + day + "/" + Admin.CurrentInvoiceNumber).update(invoiceObject);
+        db.ref("Customers/" + CurrentTicket.Customer + "/Invoices").update({[Admin.CurrentInvoiceNumber] : invoiceDate});
+        CurrentInvoices[Admin.CurrentInvoiceNumber] = invoiceObject;
+        CurrentInvoices[invoiceNumber].Refunded = true;
+        db.ref("Invoices/" + year + "/" + month + "/" + day + "/" + invoiceNumber + "/Refunded").set(true);
+        var currentDaySales = 0;
+        if("PaymentTotals" in Admin && year in Admin.PaymentTotals && month in Admin.PaymentTotals[year] && day in Admin.PaymentTotals[year][month]) {
+            currentDaySales = Admin.PaymentTotals[year][month][day];
+        }
+        db.ref("Admin/PaymentTotals/" + year + "/" + month + "/" + day).set(currentDaySales + amount);
+        db.ref("Tickets/" + ticketNumber + "/Invoices/" + Admin.CurrentInvoiceNumber).set(invoiceDate);
+        if(CurrentTicket.hasOwnProperty('Invoices')) CurrentTicket.Invoices[Admin.CurrentInvoiceNumber] = invoiceDate;
+        else CurrentTicket['Invoices'] = { [Admin.CurrentInvoiceNumber] : invoiceDate };
+        AddInvoiceToRecent(Admin.CurrentInvoiceNumber);
+        db.ref("Admin/CurrentInvoiceNumber").set(Admin.CurrentInvoiceNumber + 1);
         if(fromCustomer) {
             DrawCustomerSalesSummary();
             DrawCustomerInvoices();
@@ -142,11 +158,6 @@ function RefundInvoice(invoiceNumber, fromCustomer = false) {
             DrawTicketInvoices();
             DrawTicketPaymentSummary();
         }
-        var currentDaySales = Admin.PaymentTotals[year][month][day];
-        Admin.PaymentTotals[year][month][day] = currentDaySales - refundAmount;
-        AddInvoiceToRecent(invoiceNumber);
-        db.ref("Admin/PaymentTotals/" + year + "/" + month + "/" + day).set(currentDaySales - refundAmount);
-        console.log(CurrentInvoices);
     }
 }
 
@@ -241,7 +252,10 @@ function TicketAddPayment() {
             <div id="ticket-add-payment-other" class="popup-switch-single" tabindex="0" onclick="TicketAddPaymentSwitch(this, 'Other')"><div>OTHER</div>
                 <div class="material-symbols-outlined">shopping_bag</div></div>
         </div>
-        
+        <div style="display: flex; align-items: center; width: 240px;">
+            <div style="font-size: 12px; font-weight: 700; padding-right: var(--inner-padding);">NOTE</div>
+            <input id="reference-note" class="reference-input" placeholder=" ">
+        </div>
         <div style="width: 100%; text-align: center; margin-top: var(--outer-padding);">
             <button id="other-apply-button" onclick="SubmitTicketAddPayment()">Apply</button>
         </div>
@@ -270,12 +284,15 @@ function SubmitTicketAddPayment() {
         var month = invoiceDate.substring(4,6);
         var day = invoiceDate.substring(6, 8);
         invoiceDate = parseInt(invoiceDate);
-        var invoiceObject = { Amount : amount, FullDate : invoiceDate, RefundAmount : 0, Ticket : parseInt(ticketNumber), Type : paymentType };
+        var note = document.getElementById("reference-note").value;
+        var invoiceObject;
+        if(note == '') invoiceObject = { Amount : amount, FullDate : invoiceDate, Ticket : parseInt(ticketNumber), Type : paymentType, Customer: CurrentTicket.Customer, Refunded : false };
+        else invoiceObject = { Amount : amount, FullDate : invoiceDate, Ticket : parseInt(ticketNumber), Type : paymentType, Note: note, Customer: CurrentTicket.Customer, Refunded : false };
         db.ref("Invoices/" + year + "/" + month + "/" + day + "/" + Admin.CurrentInvoiceNumber).update(invoiceObject);
         db.ref("Customers/" + CurrentTicket.Customer + "/Invoices").update({[Admin.CurrentInvoiceNumber] : invoiceDate});
         CurrentInvoices[Admin.CurrentInvoiceNumber] = invoiceObject;
         var currentDaySales = 0;
-        if(Admin.PaymentTotals.hasOwnProperty(year) && Admin.PaymentTotals[year].hasOwnProperty(month) && Admin.PaymentTotals[year][month].hasOwnProperty(day)) {
+        if("PaymentTotals" in Admin && year in Admin.PaymentTotals && month in Admin.PaymentTotals[year] && day in Admin.PaymentTotals[year][month]) {
             currentDaySales = Admin.PaymentTotals[year][month][day];
         }
         db.ref("Admin/PaymentTotals/" + year + "/" + month + "/" + day).set(currentDaySales + amount);
@@ -357,8 +374,11 @@ async function DrawTicketInvoices() {
             var datePrinted = date.substring(4,6) + "/" + date.substring(6, 8) + "/" + date.substring(2,4);
             var color = 'var(--default)';
             var refund = `<div id="refund-${key}" class="invoice-refund-text" onclick="RefundInvoice(${key})">Refund</div>`;
-            if(CurrentInvoices[key].RefundAmount > 0) {
-                refund = `<div style="font-size: 10px; text-align: right;">REFUNDED</div>`;
+            if(CurrentInvoices[key].Refunded && CurrentInvoices[key].Amount >= 0) {
+                refund = `<div style="font-size: 10px; text-align: right; color: darkred;">REFUNDED</div>`;
+            }
+            else if(CurrentInvoices[key].Refunded && CurrentInvoices[key].Amount < 0) {
+                refund = '';
                 color = 'darkred';
             }
             
@@ -387,9 +407,11 @@ function DrawTicketPaymentSummary() {
         discounts += Math.round(curDiscounts * 100) / 100;
         if(CurrentTicket.Repairs[key].Tax) tax += Math.round(((currentSub - curDiscounts) * taxRate) * 100) / 100;
     }
-    if(Object.keys(CurrentInvoices).length > 0) {
+    if(CurrentInvoices != null) {
         for(var key in CurrentInvoices) {
-            payments += CurrentInvoices[key].Amount - CurrentInvoices[key].RefundAmount;
+            var refund = 0;
+            if('RefundAmount' in CurrentInvoices[key]) refund = CurrentInvoices[key].RefundAmount
+            payments += CurrentInvoices[key].Amount - refund;
         }
     }
     total = subTotal + tax - discounts - payments;

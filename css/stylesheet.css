@@ -83,6 +83,7 @@ menu { width: var(--menu-size); min-width: var(--menu-size); background-color: v
 .icon-box.mobile { width: var(--mobile-menu-height); height: var(--mobile-menu-height); }
 .icon-box .material-symbols-outlined { font-size: 26px; color: var(--menu-font); }
 .icon-box .material-symbols-outlined.mobile { font-size: 20px; }
+.tiny-link { font-size: 10px; font-weight: 700; padding: 8px var(--inner-padding); }
 
 /*  Mobile Icon Containers  */
 #mobile-name-icon-container { width: calc(100% - var(--mobile-menu-height)); height: var(--mobile-menu-height); max-height: var(--mobile-menu-height); 
@@ -105,6 +106,8 @@ menu { width: var(--menu-size); min-width: var(--menu-size); background-color: v
 }
 @media (hover:hover) {
     .icon-box:hover { background-color: var(--menu-hover); cursor: pointer; }
+    .icon-box.no-hover:hover { background-color: transparent; cursor: default; }
+    .tiny-link:hover { text-decoration: underline; cursor: pointer; }
     #dropdown-icon-container.hidden:hover { cursor: pointer; }
 }
 
@@ -189,6 +192,7 @@ button.disabled { background-color: var(--button-disabled); border-color: transp
 .checkbox-text { font-size: 14px; font-weight: 500; }
 .checkbox::after { content: "check_box_outline_blank"; }
 .checkbox.selected::after { content: "check_box"; }
+.default-none { width: 100%; padding: var(--inner-padding); text-align: center; font-size: 16px; font-weight: 500; }
 
 /* MAIN LOADING SCREEN */
 #page-frame { position: absolute; width: 100vw; height: 100vh; top: 0; left: 0;  }

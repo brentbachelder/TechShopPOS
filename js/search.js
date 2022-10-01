@@ -65,7 +65,6 @@ function CreateCustomerList(list) {
     document.getElementById('search-results').innerHTML = '';
     var content = '';
     var i = 0;
-    console.log("being drawn");
     for(var key in list) {
         var selected = '';
         if(i == searchSelection) selected = ' selected';
