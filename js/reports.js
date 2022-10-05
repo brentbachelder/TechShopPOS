@@ -177,12 +177,15 @@ async function GetRecentCompletedTickets() {
     var recents = GetDescending(Admin.RecentlyCompletedTickets, 10);
     for(var outer in recents) {
         for(var key in recents[outer]) {
-            await db.ref("Tickets").child(recents[outer][key]).once('value').then(snap => { 
-                var ticketResponse = snap.val();
-                var repairDescription = GetRepairDescription(ticketResponse);
-                var data = {"Ticket" : parseInt(recents[outer][key]), "Name" : Customers[ticketResponse.Customer].Name, "Description" : repairDescription };
-                recentCompleted[outer] = data;
-            });
+            var tick = recents[outer][key].toString().substring(0,6);
+            var customer = recents[outer][key].toString().substring(6);
+            var repairDescription = '';
+            for(var key in Customers[customer].Tickets) {
+                if(key == parseInt(tick)) repairDescription = Customers[customer].Tickets[key];
+            }
+
+            var data = {"Ticket" : parseInt(tick), "Name" : Customers[customer].Name, "Description" : repairDescription };
+            recentCompleted[outer] = data;
         }
     }
     DrawRecentCompletedTickets();
@@ -254,7 +257,6 @@ function DrawSalesData() {
         dy.sort(function(a, b) { return a - b; });
         lowDy = dy[0];
         var firstDay = lowYr.toString() + lowMo.toString() + lowDy.toString();
-        console.log(firstDay);
 
         var today = new Date();
         var current = today.getFullYear().toString() + today.getMonth().toString() + today.getDate().toString();
@@ -278,15 +280,14 @@ function DrawSalesData() {
 
             if(dailyAvgYear && (current == lastYear || counter > 365)) break loop1;
         }
-        console.log("Counter is " + counter);
-        console.log(days);
-        console.log(dayCounter);
     }
 
     var content = '<div style="display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: var(--inner-padding);">';
     var dayNames = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
     for(var i = 0; i < dayCounter.length; i++) {
-        var total = Math.round(days[i] / dayCounter[i]);
+        var total = 0;
+        if(dayCounter[i] != 0) total = Math.round(days[i] / dayCounter[i]);
+        
         content += `
             <div style="width: calc(100vw * .08); min-width: 80px; text-align: center;">
                 <div style="font-size: 12px; font-weight: 700;">${dayNames[i]}</div>
@@ -333,8 +334,8 @@ function DrawRecentInvoices() {
         var note = '';
         if('Note' in recentInvoices[outer] && recentInvoices[outer].Note != '') note = `&nbsp;&nbsp;(${recentInvoices[outer].Note})`;
         var amount = `<div style="flex-grow: 1; color: var(--default);"><b>$${recentInvoices[outer].Amount.toFixed(2)}</b>${note}</div>`;
-        if('RefundAmount' in recentInvoices[outer] && recentInvoices[outer].RefundAmount > 0) 
-            amount = `<div style="flex-grow: 1; color: darkred;"><b>-$${recentInvoices[outer].RefundAmount.toFixed(2)}</b>${note}</div>`;
+        if(recentInvoices[outer].Amount < 0) 
+            amount = `<div style="flex-grow: 1; color: darkred;"><b>$${recentInvoices[outer].Amount.toFixed(2)}</b>${note}</div>`;
 
         
         content += `

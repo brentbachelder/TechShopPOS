@@ -125,7 +125,7 @@ function UpdateRepair(element, repairNum, isPrice = false) {
     DrawTicketPaymentSummary();
 }
 
-function RefundInvoice(invoiceNumber, fromCustomer = false) {
+function RefundInvoice(invoiceNumber) {
     if(confirm("Refund this invoice?") == true) {
         var amount = CurrentInvoices[invoiceNumber].Amount * -1;
         var invoiceDate = DateConvert(true);
@@ -139,7 +139,11 @@ function RefundInvoice(invoiceNumber, fromCustomer = false) {
         db.ref("Customers/" + CurrentTicket.Customer + "/Invoices").update({[Admin.CurrentInvoiceNumber] : invoiceDate});
         CurrentInvoices[Admin.CurrentInvoiceNumber] = invoiceObject;
         CurrentInvoices[invoiceNumber].Refunded = true;
-        db.ref("Invoices/" + year + "/" + month + "/" + day + "/" + invoiceNumber + "/Refunded").set(true);
+        
+        var refundYear = CurrentInvoices[invoiceNumber].FullDate.toString().substring(0,4);
+        var refundMonth = CurrentInvoices[invoiceNumber].FullDate.toString().substring(4,6);
+        var refundDay = CurrentInvoices[invoiceNumber].FullDate.toString().substring(6,8);
+        db.ref("Invoices/" + refundYear + "/" + refundMonth + "/" + refundDay + "/" + invoiceNumber + "/Refunded").set(true);
         var currentDaySales = 0;
         if("PaymentTotals" in Admin && year in Admin.PaymentTotals && month in Admin.PaymentTotals[year] && day in Admin.PaymentTotals[year][month]) {
             currentDaySales = Admin.PaymentTotals[year][month][day];
@@ -150,21 +154,18 @@ function RefundInvoice(invoiceNumber, fromCustomer = false) {
         else CurrentTicket['Invoices'] = { [Admin.CurrentInvoiceNumber] : invoiceDate };
         AddInvoiceToRecent(Admin.CurrentInvoiceNumber);
         db.ref("Admin/CurrentInvoiceNumber").set(Admin.CurrentInvoiceNumber + 1);
-        if(fromCustomer) {
-            DrawCustomerSalesSummary();
-            DrawCustomerInvoices();
-        }
-        else {
-            DrawTicketInvoices();
-            DrawTicketPaymentSummary();
-        }
+        DrawTicketInvoices();
+        DrawTicketPaymentSummary();
     }
 }
 
 
 /* Popup Pages */
 function ClickToClosePopup(event) {
-    if(event.target.id == "popup-page"  || event.target.id == "popup-x")  ClosePopup();
+    if(event.target.id == "popup-page"  || event.target.id == "popup-x") {
+        if(event.target.id == "popup-x") popupInInput = false;
+        ClosePopup();
+    }
 }
 
 function ClosePopup() {
@@ -373,7 +374,7 @@ async function DrawTicketInvoices() {
             var date = CurrentInvoices[key].FullDate.toString();
             var datePrinted = date.substring(4,6) + "/" + date.substring(6, 8) + "/" + date.substring(2,4);
             var color = 'var(--default)';
-            var refund = `<div id="refund-${key}" class="invoice-refund-text" onclick="RefundInvoice(${key})">Refund</div>`;
+            var refund = `<div id="refund-${key}" class="invoice-refund-text" onclick="RefundInvoice(${key},${CurrentInvoices[key].FullDate.toString()})">Refund</div>`;
             if(CurrentInvoices[key].Refunded && CurrentInvoices[key].Amount >= 0) {
                 refund = `<div style="font-size: 10px; text-align: right; color: darkred;">REFUNDED</div>`;
             }
@@ -408,11 +409,7 @@ function DrawTicketPaymentSummary() {
         if(CurrentTicket.Repairs[key].Tax) tax += Math.round(((currentSub - curDiscounts) * taxRate) * 100) / 100;
     }
     if(CurrentInvoices != null) {
-        for(var key in CurrentInvoices) {
-            var refund = 0;
-            if('RefundAmount' in CurrentInvoices[key]) refund = CurrentInvoices[key].RefundAmount
-            payments += CurrentInvoices[key].Amount - refund;
-        }
+        for(var key in CurrentInvoices) payments += CurrentInvoices[key].Amount;
     }
     total = subTotal + tax - discounts - payments;
     if(total < 0) total = 0;
@@ -582,7 +579,7 @@ function DrawTicketDetails() {
     document.getElementById("ticket-inputs-checkboxes").innerHTML = content;
     
     content = '';
-    var status = StatusDropdown(ticketNumber, CurrentTicket.Status);
+    var status = StatusDropdown(ticketNumber, CurrentTicket.Status, CurrentTicket.Customer);
     content = `
         <div style="font-size: 14px; margin: 0 0 8px -50px;"><b>TICKET STATUS</b></div>
         ${status}

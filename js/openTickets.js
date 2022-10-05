@@ -17,7 +17,7 @@ async function UpdateOpenTicketsList() {
 
                 var repairDescription = GetRepairDescription(ticketResponse);
                 var data = { "Name" : Customers[ticketResponse.Customer].Name, "Status" : ticketResponse.Status, "DateCreated" : 
-                    ticketResponse.DateCreated, "Description" : repairDescription };
+                    ticketResponse.DateCreated, "Description" : repairDescription, "Customer" : ticketResponse.Customer };
                 ticketsInProgress[ticketNum] = data;
             });
         }
@@ -59,7 +59,7 @@ function DrawIndividualOpenTickets(ticketsInProgress) {
     var newTicketsInProgress = GetDescending(ticketsInProgress);
     for(var outer in newTicketsInProgress) {
         for(var key in newTicketsInProgress[outer]) {
-            var dropdown = StatusDropdown(key, ticketsInProgress[key].Status);
+            var dropdown = StatusDropdown(key, ticketsInProgress[key].Status, ticketsInProgress[key].Customer);
             var date = DateToText(ticketsInProgress[key].DateCreated);
             var content = `
                 <div class="open-ticket-container">

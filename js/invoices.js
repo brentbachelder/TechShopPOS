@@ -105,11 +105,11 @@ function DrawInvoices(page, anotherPage = false) {
             </header>
             <div style="width: 100%; display: flex; padding: var(--inner-padding); border-bottom: 1px solid var(--default); gap: calc(100% / 20); font-size: 12px; 
             font-weight: 700; text-align: left;">
-                <div style="width: 84px;">DATE</div>
+                <div style="width: 84px; padding-left: 10px;">DATE</div>
                 <div style="width: 24px;">TYPE</div>
                 <div class="invoice-list-amount">AMOUNT</div>
                 <div class="customer-name-link">CUSTOMER NAME</div>
-                <div style="width: 130px; text-align: center;">TICKET #</div>
+                <div style="width: 80px; text-align: center;">TICKET #</div>
             </div>
             <div id="invoices-container"></div>
         </div>

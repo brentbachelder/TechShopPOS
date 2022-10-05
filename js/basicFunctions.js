@@ -128,6 +128,7 @@ function ToggleMenu() {
 function CloseMenu() {
     menu.classList.add("hidden");
     document.getElementById("click-out").classList.add("hidden");
+    document.getElementById("mobile-header").classList.remove("menu-open");
     document.getElementById("mobile-name-icon-container").classList.remove("menu-open");
     document.getElementById("menu-button").innerHTML = "menu";
     if(!document.getElementById("menu-settings").classList.contains("hidden")) {
@@ -139,6 +140,7 @@ function CloseMenu() {
 function OpenMenu() {
     menu.classList.remove("hidden");
     document.getElementById("click-out").classList.remove("hidden");
+    document.getElementById("mobile-header").classList.add("menu-open");
     document.getElementById("mobile-name-icon-container").classList.add("menu-open");
     document.getElementById("menu-button").innerHTML = "close";
 }
@@ -259,8 +261,8 @@ function DateToText(date) {
 
 
 // Create Dropdowns and Apply Status Changes
-function StatusDropdown(ticket, current) {
-    var content = `<div class="selectdiv"><label><select onchange="ApplyStatusChange(${ticket}, this.value)">`;
+function StatusDropdown(ticket, current, customer) {
+    var content = `<div class="selectdiv"><label><select onchange="ApplyStatusChange(${ticket}, this.value, ${customer})">`;
     for(var key in Settings.Tickets.Status) {
         var display = Settings.Tickets.Status[key].Display;
         var select = '';
@@ -272,19 +274,20 @@ function StatusDropdown(ticket, current) {
     return content;
 }
 
-function ApplyStatusChange(ticket, status) {
+function ApplyStatusChange(ticket, status, customer) {
     db.ref('Tickets/' + ticket).update({Status: status});
     if(status == "Completed") {
         db.ref('OpenTickets/' + ticket).remove();
         delete ticketsInProgress[ticket];
-        AddTicketToRecentlyCompleted(ticket);
-        delete ticketsInProgress[ticket];
+        AddTicketToRecentlyCompleted(ticket, customer);
     }
     else {
         db.ref('OpenTickets/' + ticket).set(status);
         if(ticket in ticketsInProgress) ticketsInProgress[ticket].Status = status;
         for(var key in Admin.RecentlyCompletedTickets) {
-            if(Admin.RecentlyCompletedTickets[key] == ticket) db.ref('Admin/RecentlyCompletedTickets/' + key).remove();
+            var tck = Admin.RecentlyCompletedTickets[key].toString();
+            tck = parseInt(tck.substring(0,6));
+            if(tck == ticket) db.ref('Admin/RecentlyCompletedTickets/' + key).remove();
         }
     }
     currentlyUsedStatuses = GetCurrentlyUsedStatuses();
@@ -295,18 +298,21 @@ function ApplyStatusChange(ticket, status) {
     }
 }
 
-function CompleteTicket(ticket) {
+/*function CompleteTicket(ticket) {
     db.ref('Tickets/' + ticket).update({Status: "Completed"});
     db.ref('OpenTickets/' + ticket).remove();
     AddTicketToRecentlyCompleted(ticket);
-}
+}*/
 
-function AddTicketToRecentlyCompleted(ticket) {
+function AddTicketToRecentlyCompleted(ticket, customer) {
     var date = parseInt(DateConvert(true));
+    var tickCust = ticket + '' + customer;
+    var intTickCust = parseInt(tickCust);
+    console.log(tickCust);
     if('RecentlyCompletedTickets' in Admin) {
-        if(Object.keys(Admin.RecentlyCompletedTickets).length < 100) db.ref('Admin/RecentlyCompletedTickets').update({[date] : ticket});
+        if(Object.keys(Admin.RecentlyCompletedTickets).length < 100) db.ref('Admin/RecentlyCompletedTickets').update({[date] : intTickCust});
         else {
-            Admin.RecentlyCompletedTickets[date] = ticket;
+            Admin.RecentlyCompletedTickets[date] = intTickCust;
             var rct = GetDescending(Admin.RecentlyCompletedTickets, 100);
             var newRct = {};
             for(var outer in rct) {
@@ -317,7 +323,7 @@ function AddTicketToRecentlyCompleted(ticket) {
             db.ref('Admin/RecentlyCompletedTickets').set(newRct);
         }
     }
-    else db.ref('Admin/RecentlyCompletedTickets').update({[date] : ticket});
+    else db.ref('Admin/RecentlyCompletedTickets').update({[date] : intTickCust});
 }
 
 function AddInvoiceToRecent(invoiceNum) {

@@ -256,7 +256,7 @@ function DrawDashboard() {
             <div class="object large">
                 <header class="green">
                     <h1>CURRENT STATUS</h1>
-                    <button class="icon-box" onclick="DrawCurrentStatus()"><div class="material-symbols-outlined">refresh</div>
+                    <button class="icon-box" onclick="DrawCurrentStatus()"><div class="material-symbols-outlined">refresh</div></button>
                 </header>
                 <div id="current-status-container"></div>
             </div>

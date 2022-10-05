@@ -574,7 +574,7 @@ async function CreateNewTicket() {
         masterRepair[i] = repairInfo;
         counter++;
     }
-    if(document.getElementById("repairs-other").value != '') {
+    if(document.getElementById("repairs-other") && document.getElementById("repairs-other").value != '') {
         var repairInfo = { 'Price': 0, 'Tax': true, 'DiscountDollar': 0, 'DiscountPercent' : 0, 'Quantity' : 1, 'Display' : document.getElementById("repairs-other").value };
         masterRepair[counter] = repairInfo;
         counter++;

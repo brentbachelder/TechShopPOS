@@ -161,19 +161,29 @@ function SubmitNewPartOrder() {
     }
 }
 
-function DrawIndividualParts() {
+async function DrawIndividualParts() {
+    
     var content = `
         <div id="part-order-header" class="part-order-single-container" style="font-size: 10px; font-weight: 700;">
             <div style="width: 40px;"></div>
-            <div class="part-date">ORDER DATE</div>
-            <div class="part-ticket">GO TO<br />TICKET</div>
+            <div class="part-date"><b>ORDER DATE</b></div>
             <div style="display: flex; flex: 1 0 0; min-width: 0; flex-wrap: wrap;">
                 <div class="part-description" style="padding-left: var(--inner-padding)">DESCRIPTION</div>
                 <div class="part-tracking-container">TRACKING #</div>
             </div>
+            <div style="width: 36px;"></div>
         </div>
     `;
     for(var key in Parts) {
+        var name = '(POS Order)';
+        if('Ticket' in Parts[key] && Parts[key].Ticket != '') {
+            await db.ref("Tickets/" + Parts[key].Ticket).child('Customer').once('value').then(snap => { 
+                var cust = snap.val();
+                if(cust in Customers) name = Customers[cust].Name;
+            });
+        }
+        else console.log("No ticket");
+        
         var year = key.substring(0,4);
         var month = key.substring(4,6);
         var day = key.substring(6, 8);
@@ -187,20 +197,21 @@ function DrawIndividualParts() {
                 <div class="part-tracking-edit" onclick="EditTrackingNumber(${key})" tabindex="0">EDIT</div>
             `;
         }
-        var ticket = '<div class="part-ticket material-symbols-outlined"></div>';
-        if(Parts[key].Ticket != '') ticket = `<a href="#ticket-${Parts[key].Ticket}" class="part-ticket material-symbols-outlined">exit_to_app</a>`;
+        var ticket = `<div class="part-description"><div class="part-owner">${name}</div><div>${Parts[key].Description}</div></div>`;
+        if(Parts[key].Ticket != '') ticket = `<a href="#ticket-${Parts[key].Ticket}" class="part-description">
+            <div style="font-size: 12px; font-weight: 700;">${name}</div><div style="font-size: 14; font-weight: 500;">${Parts[key].Description}</div></a>`;
         content += `
             <div class="part-order-single-container">
                 <div id="${key}" class="checkbox material-symbols-outlined" onclick="OpenTicketCheckbox(this)"></div>
                 <div class="part-date">${month + '/' + day + '/' + year}</div>
-                ${ticket}
                 <div style="display: flex; flex: 1 0 0; min-width: 0; flex-wrap: wrap;">
-                    <div class="part-description">${Parts[key].Description}</div>
+                    ${ticket}
                     <div class="part-tracking-container">
                         <div class="part-tracking-index">Tracking:&nbsp;&nbsp;</div>
                         ${tracking}
                     </div>
                 </div>
+                <div class="part-tracking-icon material-symbols-outlined" onclick="EditTrackingNumber(${key})" tabindex="0">local_shipping</div>
             </div>
         `;
     }

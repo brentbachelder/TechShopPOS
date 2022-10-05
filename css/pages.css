@@ -12,33 +12,13 @@
 .open-ticket-container .clock-date > .material-symbols-outlined { font-size: 18px; color: var(--description); }
 .open-ticket-container .clock-date > .date { font-size: 10px; font-weight: 400; color: var(--description); }
 
-/*  Top & Side Info */
-#open-ticket-top { width: 100%; margin-top: var(--outer-padding); }
-#open-ticket-side { display: none; } 
-#open-ticket-top header { display: flex; width: 100%; justify-content: space-evenly; align-items: center;}
-#open-ticket-top .info { padding: var(--inner-padding); font-size: 18px; font-weight: 500; color: var(--default); }
-.open-ticket-info { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 150px; background-color: #c1d9bf;
-    margin-bottom: var(--outer-padding); border-radius: var(--border-radius); gap: var(--inner-padding); box-shadow: 0 1px 4px var(--shadow); }
-
-@media (max-width: 450px) { 
+@media (max-width: 540px) { 
     .open-ticket-container .clock-date { display: none; }
-    #todays-sales { display: none; }
     .open-ticket-container .name-device { flex-grow: 1; }
 }
-@media (max-width: 600px) { 
+@media (max-width: 760px) { 
     .open-ticket-container .selectdiv { display: none; }
     .open-ticket-container .name-device { width: calc(100% - 166px); }
-}
-@media (min-width: 700px) {
-    #open-ticket-top { width: calc(100% - var(--outer-padding) - var(--outer-padding)); margin: var(--outer-padding) 0 0 var(--outer-padding); }
-}
-@media (min-width: 1000px) {
-    #open-ticket-top { margin-bottom: var(--outer-padding); }
-}
-@media (min-width: 1600px) {
-    #open-ticket-container { width: calc(75% - var(--outer-padding) / 2); }
-    #open-ticket-side { display: flex; }
-    #open-ticket-top { display: none; }
 }
 @media (hover:hover) {
     .open-ticket-container:hover { background-color: var(--hover);  }
@@ -109,7 +89,7 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 .color-box { width: 28px; min-width: 28px; height: 28px; border: 1px solid var(--input-placeholder); box-sizing: border-box; padding: 0; }
 .color-box.selected { border: 3px solid var(--input-border); }
 
-@media (min-width: 500px) {
+@media (min-width: 600px) {
     #input-customer-container .input-shell { width: calc(50% - (var(--inner-padding) / 2)); min-width: 250px; }
 }
 @media (min-width: 1600px) {
@@ -130,11 +110,11 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 
 /*  Ticket Information   */
 .ticket-details-container { display: flex; flex-wrap: wrap; width: 100%; }
-#ticket-inputs { padding: var(--inner-padding); width: 100%; }
+#ticket-inputs { padding: var(--inner-padding); width: 50%; }
 .ticket-input-container { display: flex; flex-wrap: wrap; width: 100%; align-items: center; justify-content: flex-start; }
 .ticket-input-single { padding: calc(var(--inner-padding) / 2) var(--inner-padding); font-size: 14px; width: 200px; }
 .checkbox-container.ticket-input-single { margin: 0; padding: calc(var(--inner-padding) / 2) 8px; }
-#ticket-status { display: flex; width: 100%; flex-direction: column; align-items: center; justify-content: center; padding: var(--outer-padding); }
+#ticket-status { display: flex; width: 50%; flex-direction: column; align-items: center; justify-content: center; padding: var(--outer-padding); }
 .complete-ticket { margin: 20px 0 0 50px; font-size: 12px; font-weight: 500; }
 
 /*  Customer Description    */
@@ -168,7 +148,7 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 .ticket-repair-single.open > .ticket-repair-single-inputs-container input { visibility: visible; }
 
 /*  Invoices & Payment Summary   */
-#ticket-right-column .object.medium { flex: 1 1 0; min-width: 270px; }
+#ticket-right-column .object.medium { flex: 1 1 0; min-width: 364px; }
 .invoice-refund-text { font-size: 12px; color: darkred; width: 60px; text-align: right; }
 #reference-note { flex-grow: 1; height: 28px; border: 2px solid var(--default); border-radius: calc(var(--border-radius) / 2); padding: 0 8px; }
 #reference-note:placeholder-shown { border-color: var(--input-border);}
@@ -212,12 +192,10 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 #popup-page textarea.error::-webkit-input-placeholder { color: red; }
 
 
-@media (min-width: 620px) {
-    #ticket-inputs { width: 50%; }
-    #ticket-status { width: 50%; }
-}
-@media (max-width: 800px) {
+@media (max-width: 760px) {
     #ticket-left-column, #ticket-right-column { min-width: 100%; max-width: none; }
+    #ticket-inputs { width: 100%; }
+    #ticket-status { width: 100%; }
 }
 @media (hover:hover) {
     .ticket-repair-single-text:hover { background-color: var(--hover); cursor: pointer; }
@@ -238,7 +216,7 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
     gap: var(--inner-padding); }
 .part-order-single-container .material-symbols-outlined { font-size: 22px; }
 .part-order-single-container:last-of-type { border-bottom: 0; }
-.part-date { width: 90px; }
+.part-date { width: 90px; font-weight: 500; }
 .part-ticket { width: 40px; text-align: center; }
 .part-description { width: 60%; min-width: 0; text-align: left; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .part-tracking-container { width: 40%; min-width: 0; display: flex; align-items: center; gap: 10px; }
@@ -247,23 +225,26 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 .part-tracking-edit { color: red; font-size: 10px; font-weight: 700; padding: 4px 0; width: 40px; text-align: center; }
 .part-tracking-edit.empty { width: 100%; color: blue; text-align: left; }
 .part-tracking.tracks { text-decoration: underline; }
+.part-tracking-icon.material-symbols-outlined { font-size: 24px; width: 36px; height: 36px; align-items: center; justify-content: center; display: none; }
 .mark-part-received { font-size: 12px; padding: 14px 10px; }
 .icon-box.hidden { display: none; }
 
-@media (max-width: 768px) {
+@media (max-width: 760px) {
     #part-order-header { display: none; }
     .part-order-single-container { flex-wrap: wrap; }
     .part-date, .part-tracking-edit.material-symbols-outlined, .part-ticket.material-symbols-outlined { display: none; }
     .part-description { width: 100%; }
-    .part-tracking-container { width: 100%; padding-top: 8px; }
+    .part-tracking-container { display: none; }
     .part-tracking-index { display: block; }
     .part-tracking-edit-small { display: block; }
+    .part-tracking-icon.material-symbols-outlined { display: flex; }
 }
 @media (hover:hover) {
     .part-ticket:hover, .part-tracking:hover { color: var(--text-hover); cursor: pointer; }
     .part-tracking-edit:hover { color: darkred; cursor: pointer; }
     .part-tracking-edit.empty:hover { color: darkblue; }
     .mark-part-received:hover { background-color: var(--hover); cursor: pointer; }
+    .part-tracking-icon:hover { cursor: pointer; }
 }
 
 
@@ -303,7 +284,6 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 @media (hover:hover) {
     .customer-ticket-container:hover { background-color: var(--hover); }
     .customer-invoice-link:hover { text-decoration: underline; }
-    /*.slider::-webkit-slider-thumb:hover { opacity: 1; background-color: var(--text-hover); }*/
 }
 
 
@@ -316,18 +296,36 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 .invoice-list-amount { width: 80px; font-weight: 700; text-align: center; }
 
 /* Custom Invoice Search, Recent Invoices and Recent Completed Tickets */
+.object.medium.custom-invoice-results, .object.medium.custom-invoice-daily { max-height: calc(100vh - 308px - (var(--outer-padding) * 2)); overflow-y: scroll;
+    -ms-overflow-style: none; scrollbar-width: none;  }
+.object.medium.custom-invoice-results::-webkit-scrollbar, .object.medium.custom-invoice-daily::-webkit-scrollbar { display: none; }
 .custom-invoice-date { width: 100%; height: 40px; border-radius: var(--border-radius); font-size: 14px; padding: 0 var(--inner-padding);}
 .recent-invoices-ticket-num { width: 50px; font-weight: 700; font-size: 12px; text-align: center; color: darkgreen; }
+#daily-invoice-go-back { display: none; }
+.individual-completed-container { width: 100%; display: flex; padding: var(--inner-padding); border-bottom: 1px solid var(--default); gap: calc(100% / 20); align-items: center; }
+
+/*  Custom Invoice Page */
+.daily-search-container { display: flex; width: 100%; align-items:center; padding: var(--inner-padding) calc(100% / 20); 
+    gap: calc(100% / 20); height: 50px; border-bottom: 1px solid var(--default); }
+.daily-search-container.top { border-top: 1px solid var(--default); }
+.view-invoices-link { width: 100px; display: flex; font-size: 12px; font-weight: 700; color: darkgreen; }
 
 @media (max-width: 600px) {
+    .object.medium.custom-invoice-daily { display: none; }
+    .container.daily-shown > .object.medium.custom-invoice-results { display: none; }
+    .container.daily-shown > .object.medium.custom-invoice-daily { display: flex; }
+    .container.daily-shown > .object.medium.results-summary { display: none; }
     .customer-name-link { display: none; }
     .invoice-list-amount { flex-grow: 1; }
+    .object.medium.custom-invoice-results, .object.medium.custom-invoice-daily { max-height:none; }
+    #daily-invoice-go-back { display: block; }
 }
 
 @media (hover:hover) {
     #sales-toggle-button:hover, #basis-toggle-button:hover { cursor: pointer; }
     a.customer-name-link:hover { text-decoration: underline; }
-    .recent-invoices-ticket-num:hover { text-decoration: underline; }
+    .recent-invoices-ticket-num:hover, .view-invoices-link:hover { text-decoration: underline; cursor: pointer; }
+    .individual-completed-container:hover { background-color: var(--hover); cursor: pointer; }
 }
 
 
