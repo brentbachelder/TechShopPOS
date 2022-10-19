@@ -495,6 +495,7 @@ function DrawNewRepair() {
     
     `;
     $("#frame").html(content);
+    pageLoading = false;
 }
 
 
@@ -535,7 +536,8 @@ async function CreateNewTicket() {
             if(Customers[newTicketCustomer][checkKey] != custInfo[checkKey] || !Customers[newTicketCustomer].hasOwnProperty(checkKey)) 
                 Customers[newTicketCustomer][checkKey] = custInfo[checkKey];
         }
-        Object.assign(Customers[newTicketCustomer].Tickets, ticketObject);
+        if('Tickets' in Customers[newTicketCustomer]) Object.assign(Customers[newTicketCustomer].Tickets, ticketObject);
+        else Customers[newTicketCustomer]['Tickets'] = {[ticketNumber] : ticketDescription};
     }
     else {
         if(Customers != null) Customers[newTicketCustomer] = custInfo;
@@ -653,6 +655,7 @@ async function CreateNewTicket() {
         typeCount = Admin.TypeCounts[year][newDevice][newType];
     db.ref("Admin/TypeCounts/" + year + "/" + newDevice).update({[newType] : typeCount + 1});
 
+    
     ClearTemporary();
     window.location = "#ticket-" + ticketNumber;
 }
@@ -680,7 +683,6 @@ function RestoreTemporary() {
             for(var i = 0; i < TemporaryNewTicketRepairs.length; i++) document.getElementById(TemporaryNewTicketRepairs[i]).classList.add("selected");
             SelectColor(TemporaryNewTicketDevice.Color);
             for(var j = 0; j < TemporaryNewTicketCheckboxes.length; j++) document.getElementById(TemporaryNewTicketCheckboxes[j]).classList.add("selected");
-
         }
     }
     for(var key in TemporaryNewTicketInputs) {
@@ -697,6 +699,7 @@ function ClearTemporary() {
     selectedModelNumber = '';
     for (var key in TemporaryNewTicketInputs) delete TemporaryNewTicketInputs[key];
     for (var key in TemporaryNewTicketDevice) delete TemporaryNewTicketDevice[key];
+    repairList = [];
     TemporaryNewTicketCustomOpen = false;
     TemporaryNewTicketRepairs = [];
     TemporaryNewTicketCheckboxes = [];

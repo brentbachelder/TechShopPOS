@@ -26,4 +26,5 @@ function DrawSettings() {
     
     `;
     $("#frame").html(content);
+    pageLoading = false;
 }

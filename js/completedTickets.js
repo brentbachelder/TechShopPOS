@@ -18,8 +18,8 @@ function RetrieveCompleted(page) {
     var count = 0;
 
     for(var outer in sorted) {
+        count++;
         if(outer >= page * 20 - 20 && outer < page * 20) {
-            count++;
             for(var date in sorted[outer]) {
                 var dateUpdate = date.substring(4,6) + "/" + date.substring(6,8) + "/" + date.substring(2,4);
                 var ticketNum = sorted[outer][date].toString().substring(0,6);
@@ -42,7 +42,8 @@ function RetrieveCompleted(page) {
             }
         }
     }
-    if(count < 20) nextPage = false;
+    console.log("Count is " + count);
+    if(count <= 20 * page) nextPage = false;
     
     DrawCompletedTickets(page, nextPage);
     document.getElementById('completed-tickets-container').innerHTML = content;
@@ -77,4 +78,5 @@ function DrawCompletedTickets(page, anotherPage = false) {
     </div>
     `;
     $("#frame").html(content);
+    pageLoading = false;
 }

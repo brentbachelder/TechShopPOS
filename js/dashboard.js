@@ -299,4 +299,5 @@ function DrawDashboard() {
     </div>
     `;
     $("#frame").html(content);
+    pageLoading = false;
 }

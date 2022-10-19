@@ -116,6 +116,17 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 .checkbox-container.ticket-input-single { margin: 0; padding: calc(var(--inner-padding) / 2) 8px; }
 #ticket-status { display: flex; width: 50%; flex-direction: column; align-items: center; justify-content: center; padding: var(--outer-padding); }
 .complete-ticket { margin: 20px 0 0 50px; font-size: 12px; font-weight: 500; }
+#pdf-dropdown-container { height: calc(16px + calc(var(--inner-padding) * 2)); max-height: calc(16px + calc(var(--inner-padding) * 2)); max-width: 60px; 
+    margin-right: var(--inner-padding); }
+header .icon-box.open-pdf { width: 60px; min-width: 60px; display: flex; justify-content: center; align-items: center; margin-right: 0; background-color: transparent; }
+#pdf-dropdown { width: 160px; height: 0; background-color: #ffffff; position: relative; right: 100px; transition-duration: .2s; overflow: hidden; white-space: nowrap; }
+.pdf-dropdown-item { width: 100%; border: 1px solid var(--default); padding: 8px 0; font-size: 12px; font-weight: 700; text-align: center; }
+#pdf-dropdown-container.open > .open-pdf { background-color: #dddddd; }
+#pdf-dropdown-container.open > #pdf-dropdown { height: 99px; } /* 33px x number of items */
+#pdf-down-arrow:after { content: 'arrow_drop_down'}
+#pdf-dropdown-container.open #pdf-down-arrow:after { content: 'arrow_drop_up'; }
+#edit-ticket-delete { padding: 4px 8px; font-size: 12px; font-weight: 500; color: darkred; }
+
 
 /*  Customer Description    */
 .ticket-customer-description-single-container { display: flex; padding: calc(var(--inner-padding) / 2); align-items: center;  }
@@ -200,11 +211,13 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 @media (hover:hover) {
     .ticket-repair-single-text:hover { background-color: var(--hover); cursor: pointer; }
     .ticket-repair-single.open > .ticket-repair-single-text:hover { background-color: transparent; cursor: default; }
-    .ticket-remove-text:hover, .ticket-part-text:hover { text-decoration: underline; cursor: pointer; }
+    .ticket-remove-text:hover, .ticket-part-text:hover, #edit-ticket-delete:hover { text-decoration: underline; cursor: pointer; }
     .ticket-part-text.ordered:hover { text-decoration: none; cursor: default; }
     .invoice-refund-text:hover { text-decoration: underline; color: red; cursor: pointer; }
     #popup-x:hover{ cursor: pointer; background-color: var(--menu-hover); }
     .popup-switch-single:hover, .popup-switch-note-single:hover { cursor: pointer; }
+    header .icon-box.open-pdf:hover { background-color: var(--hover); }
+    .pdf-dropdown-item:hover { cursor: pointer; background-color: var(--hover); }
 }
 
 
@@ -283,7 +296,7 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 
 @media (hover:hover) {
     .customer-ticket-container:hover { background-color: var(--hover); }
-    .customer-invoice-link:hover { text-decoration: underline; }
+    a.customer-invoice-link:hover { text-decoration: underline; }
 }
 
 
@@ -324,7 +337,7 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 @media (hover:hover) {
     #sales-toggle-button:hover, #basis-toggle-button:hover { cursor: pointer; }
     a.customer-name-link:hover { text-decoration: underline; }
-    .recent-invoices-ticket-num:hover, .view-invoices-link:hover { text-decoration: underline; cursor: pointer; }
+    a.recent-invoices-ticket-num:hover, .view-invoices-link:hover { text-decoration: underline; cursor: pointer; }
     .individual-completed-container:hover { background-color: var(--hover); cursor: pointer; }
 }
 
@@ -342,4 +355,31 @@ button.type { width: 150px; background-color: transparent; border: 0; height: 40
 
 @media (hover:hover) {
     .number-percent-switch:hover { cursor: pointer; }
+}
+
+
+
+
+/* || POS / QUICKSALE ||
+/*  Sale  */
+#pos-item-container { width: 100%; max-width: 300px; }
+.pos-input { width: 100%; height: 52px; padding: 0 var(--inner-padding); border: 2px solid var(--default); font-size: 16px;
+    border-radius: var(--border-radius); background-color: var(--background); display: flex; align-items: center; }
+.pos-input:placeholder-shown { background-color: var(--input-background); border: 2px solid var(--input-border); }
+.pos-item-input-error { color: darkred; padding-left: 8px; display: none; }
+#pos-item-input-price { border: 2px solid var(--default); }
+#pos-item-input-price:placeholder-shown { background-color: var(--input-background); border: 2px solid var(--input-border); }
+.pos-input:focus-within, #pos-item-input-price:focus-within { border: 2px solid var(--default); background-color: var(--background); }
+#pos-item-container.error .pos-input { border-color: darkred; }
+#pos-item-container.error .pos-input:focus-within { border-color: darkred; }
+#pos-item-container.error .pos-item-input-error { display: block; }
+
+/*  Repair  */
+#pos-repair-container { height: 306px; overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none;  }
+#pos-repair-container::-webkit-scrollbar, #pos-repair-container::-webkit-scrollbar { display: none; }
+#pos-invoices-container { height: 212px; overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none;  }
+#pos-invoices-container::-webkit-scrollbar, #pos-invoices-container::-webkit-scrollbar { display: none; }
+
+@media (max-width: 760px) {
+    #pos-repair-container, #pos-invoices-container { height: auto; }
 }

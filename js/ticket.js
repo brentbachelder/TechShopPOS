@@ -118,6 +118,9 @@ function UpdateRepair(element, repairNum, isPrice = false) {
     if(element.id == "DiscountDollar") {
         if(element.value > CurrentTicket.Repairs[repairNum].Price) element.value = CurrentTicket.Repairs[repairNum].Price.toFixed(2);
     }
+    if(element.id == "DiscountPercent") {
+        if(element.value > 100) element.value = 100;
+    }
     CurrentTicket.Repairs[repairNum][element.id] = parseFloat(element.value);
     db.ref("Tickets/" + ticketNumber + "/Repairs/" + repairNum + "/" + element.id).set(parseFloat(element.value));
     document.getElementById("ticket-single-price-" + repairNum).innerHTML = "$" + parseInt(CurrentTicket.Repairs[repairNum].Price);
@@ -185,6 +188,9 @@ function CheckPopupEnter(event) {
             SubmitTicketAddPayment();
         }
         else if(event.target.id == "tracking-number") SubmitTrackingNumber();
+    }
+    else {
+        if(document.getElementById(event.target.id + '-container')) document.getElementById(event.target.id + '-container').classList.remove("error");
     }
 }
 
@@ -278,7 +284,7 @@ function TicketAddPaymentSwitch(element, value) {
 function SubmitTicketAddPayment() {
     var amount = document.getElementById("add-repair-payment").value;
     amount = parseFloat(amount);
-    amount = Math.floor(amount * 100) / 100;
+    //amount = Math.floor(amount * 100) / 100;
     if(amount > 0 && amount <= CurrentTicket.Balance) {
         var invoiceDate = DateConvert(true);
         var year = invoiceDate.substring(0,4);
@@ -305,6 +311,7 @@ function SubmitTicketAddPayment() {
         ClosePopup();
         DrawTicketPaymentSummary();
         DrawTicketInvoices();
+        console.log(CurrentTicket);
     }
     else {
         document.getElementById("add-repair-payment-container").classList.add("error");
@@ -346,8 +353,10 @@ function AddTicketNote() {
         var date = DateConvert(true);
         var type = "Tech Note";
         if(document.getElementById("invoice-note").classList.contains("selected")) type = "Invoice Note";
-        CurrentTicket.Notes[date] = {Content : document.getElementById("add-note-contents").value, Type : type};
-        db.ref("Tickets/" + ticketNumber + "/Notes/" + date).update({Content : document.getElementById("add-note-contents").value, Type : type});
+        var value = document.getElementById("add-note-contents").value;
+        value = value.replace(/\n\r?/g, '<br />');
+        CurrentTicket.Notes[date] = {Content : value, Type : type};
+        db.ref("Tickets/" + ticketNumber + "/Notes/" + date).update({Content : value, Type : type});
         popupInInput = false;
         ClosePopup();
         DrawTicketNotes();
@@ -357,6 +366,91 @@ function AddTicketNote() {
 function ClearNoteError() {
     document.getElementById("add-note-contents").classList.remove("error");
     document.getElementById("add-note-contents").placeholder = "";
+}
+
+function TicketEdit() {
+    document.getElementById("popup-page").classList.remove("hidden");
+    var content = `
+        <div class="popup-header">EDIT TICKET</div>
+        <div id="ticket-edit-device-container" class="popup-input-container">
+            <div class="header">DEVICE<div class="popup-required">&nbsp;&nbsp;&nbsp;&nbsp;- Can't be Blank</div></div>
+            <input id="ticket-edit-device" placeholder="Device *" value="${CurrentTicket.Device}" onkeydown="CheckPopupEnter(event)">
+        </div>
+        <div id="ticket-edit-type-container" class="popup-input-container">
+            <div class="header">TYPE<div class="popup-required">&nbsp;&nbsp;&nbsp;&nbsp;- Can't be Blank</div></div>
+            <input id="ticket-edit-type" placeholder="Device Type *" value="${CurrentTicket.Type}" onkeydown="CheckPopupEnter(event)">
+        </div>`;
+    for(var key in Settings.Tickets.Inputs) {
+        var display = Settings.Tickets.Inputs[key].Display;
+        if(Settings.Tickets.Inputs[key].Enabled) {
+            content += `
+            <div class="popup-input-container small">
+                <div class="header">${display}</div>
+                <input id="ticket-edit-inputs-${key}" class="small" placeholder="${display}" onkeydown="CheckPopupEnter(event)" value="${CurrentTicket[display]}">
+            </div>
+            `;
+        }
+    }    
+    content += ` 
+        <div style="width: 100%; text-align: center;">
+            <button id="other-apply-button" onclick="SubmitEditTicket()">Apply</button>
+        </div>
+        <div style="text-align: center;"><div id="edit-ticket-delete" tabindex="0" onclick="DeleteTicket()">DELETE TICKET</div></div>
+    `;
+    document.getElementById("popup-container").innerHTML = content;
+    document.getElementById("ticket-edit-device").focus();
+    popupInInput = true;
+}
+
+function SubmitEditTicket() {
+    if(document.getElementById("ticket-edit-device").value == "") document.getElementById("ticket-edit-device-container").classList.add("error");
+    if(document.getElementById("ticket-edit-type").value == "") document.getElementById("ticket-edit-type-container").classList.add("error");
+    if(document.getElementById("ticket-edit-device").value != "" && document.getElementById("ticket-edit-type").value != "") {
+        db.ref("Tickets/" + ticketNumber + "/Device").set(document.getElementById("ticket-edit-device").value);
+        db.ref("Tickets/" + ticketNumber + "/Type").set(document.getElementById("ticket-edit-type").value);
+        CurrentTicket.Device = document.getElementById("ticket-edit-device").value;
+        CurrentTicket.Type = document.getElementById("ticket-edit-type").value;
+        for(var key in Settings.Tickets.Inputs) {
+            var display = Settings.Tickets.Inputs[key].Display;
+            if(Settings.Tickets.Inputs[key].Enabled) {
+                db.ref("Tickets/" + ticketNumber + "/" + display).set(document.getElementById("ticket-edit-inputs-" + key).value);
+                CurrentTicket[display] = document.getElementById("ticket-edit-inputs-" + key).value
+            }
+        }
+        popupInInput = false;
+        ClosePopup();
+        
+        var model = '';
+        if(CurrentTicket.ModelNmbr != '' && CurrentTicket.ModelNmbr != undefined) model = `(${CurrentTicket.ModelNmbr})`;
+        document.getElementById("ticket-details-header").innerHTML = `#${ticketNumber} - ${CurrentTicket.Device} ${CurrentTicket.Type}${model}`;
+        DrawTicketDetails();
+    }
+}
+
+async function DeleteTicket() {
+    if(confirm("Delete this ticket?") == true) {
+        // Remove ticket, remove from invoices, remove from customer, remove from open tickets, remove from recently closed tickets
+        if('Invoices' in CurrentTicket) {
+            for(var key in CurrentTicket.Invoices) {
+                var year = CurrentTicket.Invoices[key].toString().substring(0,4);
+                var month = CurrentTicket.Invoices[key].toString().substring(4,6);
+                var day = CurrentTicket.Invoices[key].toString().substring(6, 8);
+                await db.ref("Invoices/" + year + "/" + month + "/" + day + "/" + key + "/Ticket").remove();
+            }
+        }
+        if(ticketNumber in OpenTickets) await db.ref("OpenTickets/" + ticketNumber).remove();
+        if('RecentlyCompletedTickets' in Admin) {
+            for(var key in Admin.RecentlyCompletedTickets) {
+                if(Admin.RecentlyCompletedTickets[key] == parseInt(ticketNumber.toString() + CurrentTicket.Customer.toString())) 
+                    await db.ref("Admin/RecentlyCompletedTickets/" + key).remove();
+            }
+        }
+        await db.ref("Customers/" + CurrentTicket.Customer + "/Tickets/" + ticketNumber).remove();
+        await db.ref("Tickets/" + ticketNumber).remove();
+        var url = window.location.toString();
+        url = url.split('#')[0];
+        location.href = url + `#open-tickets`;
+    }
 }
 
 
@@ -595,8 +689,20 @@ function DrawTicket() {
     <div class="container">
         <div class="object large">
             <header class="gray">
-                <h1 class="larger">#${ticketNumber} - ${CurrentTicket.Device} ${CurrentTicket.Type}${model}</h1>
-                <button class="icon-box" onclick="ClearNewTicketCustomer()"><div class="material-symbols-outlined">refresh</div></button>
+                <h1 class="larger" style="align-items: flex-start;" id="ticket-details-header">#${ticketNumber} - ${CurrentTicket.Device} ${CurrentTicket.Type}${model}</h1>
+                <button class="icon-box" onclick="PrintTicket(${ticketNumber}, 'CustomerTicket')"><div class="material-symbols-outlined" style="font-size: 28px;">print</div></button>
+                <button class="icon-box" onclick="TicketEdit()"><div class="material-symbols-outlined" style="font-size: 28px;">edit_note</div></button>
+                <div id="pdf-dropdown-container">
+                    <button class="icon-box open-pdf" onclick="document.getElementById('pdf-dropdown-container').classList.toggle('open')">
+                        <div class="material-symbols-outlined" style="font-size: 28px; margin-right: 0;">picture_as_pdf</div>
+                        <div id="pdf-down-arrow" class="material-symbols-outlined" style="margin-right: 0;"></div>
+                    </button>
+                    <div id="pdf-dropdown">
+                        <div class="pdf-dropdown-item" tabindex="0" onclick="PrintPDF()">PRINT INVOICE</div>
+                        <div class="pdf-dropdown-item" tabindex="0" onclick="EmailPDF()">EMAIL INVOICE</div>
+                        <div class="pdf-dropdown-item" tabindex="0" onclick="DownloadPDF()">DOWNLOAD INVOICE</div>
+                    </div>
+                </div>
             </header>
             <div class="ticket-details-container">
                 <div id="ticket-inputs">
@@ -642,7 +748,8 @@ function DrawTicket() {
                 </div>
                 <div class="object medium">
                     <header class="yellow">
-                        <h1 style="justify-content: center;">INVOICES</h1>
+                        <h1>INVOICES</h1>
+                        <button class="icon-box" onclick="PrintTicket(${ticketNumber}, 'Receipt')"><div class="material-symbols-outlined">print</div></button>
                     </header>
                     <div id="ticket-invoices-container""></div>
                 </div>
@@ -656,4 +763,5 @@ function DrawTicket() {
     </div>
     `;
     $("#frame").html(content);
+    pageLoading = false;
 }

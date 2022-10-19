@@ -67,7 +67,7 @@ function DrawAllInvoices(page) {
                 var nameLink = `<a href="#customer-${organizedInvoices[i][date].CustNum}" class="customer-name-link">${organizedInvoices[i][date].Name}</a>`;
                 if(organizedInvoices[i][date].Name == '(no name)') nameLink = `<div class="customer-name-link">${organizedInvoices[i][date].Name}</div>`;
                 var ticketLink = `<a href="#ticket-${organizedInvoices[i][date].Ticket}" class="customer-invoice-link">#${organizedInvoices[i][date].Ticket}</a>`;
-                if(organizedInvoices[i][date].Ticket == "''") ticketLink = `<div class="customer-invoice-link"></div>`;
+                if(organizedInvoices[i][date].Ticket == "''" || organizedInvoices[i][date].Ticket == undefined) ticketLink = `<div class="customer-invoice-link">POS</div>`;
                 content += `
                     <div style="display: flex; width: 100%; align-items:center; height: 60px; border-bottom: 1px solid var(--default); gap: calc(100% / 20); padding: 0 var(--inner-padding);">
                         <div style="width: 84px; text-align: center;">${datePrinted}</div>
@@ -116,4 +116,5 @@ function DrawInvoices(page, anotherPage = false) {
     </div>
     `;
     $("#frame").html(content);
+    pageLoading = false;
 }

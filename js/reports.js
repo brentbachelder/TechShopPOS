@@ -331,6 +331,8 @@ function DrawRecentInvoices() {
         else if("Type" in recentInvoices[outer] && recentInvoices[outer].Type == "Cash") type = 'payments';
         var date = recentInvoices[outer].FullDate.toString();
         var datePrinted = date.substring(4,6) + "/" + date.substring(6, 8) + "/" + date.substring(2,4);
+        var ticket = `<div class="recent-invoices-ticket-num">POS</div>`;
+        if('Ticket' in recentInvoices[outer]) ticket = `<a href="#ticket-${recentInvoices[outer].Ticket}" class="recent-invoices-ticket-num">#${recentInvoices[outer].Ticket}</a>`;
         var note = '';
         if('Note' in recentInvoices[outer] && recentInvoices[outer].Note != '') note = `&nbsp;&nbsp;(${recentInvoices[outer].Note})`;
         var amount = `<div style="flex-grow: 1; color: var(--default);"><b>$${recentInvoices[outer].Amount.toFixed(2)}</b>${note}</div>`;
@@ -343,11 +345,11 @@ function DrawRecentInvoices() {
                 <div style="width: 24px;" class="material-symbols-outlined">${type}</div>
                 <div style="width: 84px; text-align: center;">${datePrinted}</div>
                 ${amount}
-                <a href="#ticket-${recentInvoices[outer].Ticket}" class="recent-invoices-ticket-num">#${recentInvoices[outer].Ticket}</a>
+                ${ticket}
             </div>
         `;
     }
-    document.getElementById('recent-invoices-container').innerHTML = content;
+    if(document.getElementById('recent-invoices-container')) document.getElementById('recent-invoices-container').innerHTML = content;
 }
 
 function DrawRecentCompletedTickets() {
@@ -420,4 +422,5 @@ function DrawReports() {
     </div>
     `;
     $("#frame").html(content);
+    pageLoading = false;
 }

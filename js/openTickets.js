@@ -94,4 +94,5 @@ function DrawOpenTickets() {
         </div>
     `;
     $("#frame").html(content);
+    pageLoading = false;
 }

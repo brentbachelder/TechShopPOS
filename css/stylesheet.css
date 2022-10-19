@@ -183,6 +183,9 @@ h1.larger { font-weight: 700; font-size: 24px; }
 header .icon-box { height: calc(16px + calc(var(--inner-padding) * 2)); width: calc(16px + calc(var(--inner-padding) * 2)); border: 0; border-radius: 0;
     min-width: calc(16px + calc(var(--inner-padding) * 2)); margin-right: var(--inner-padding); background-color: transparent; }
 header .icon-box .material-symbols-outlined { font-size: 20px; color: var(--default); }
+header .ticket-icon { height: calc(16px + calc(var(--inner-padding) * 2)); width: 70px; min-width: 70px; display: flex; align-items: center; justify-content: center;
+    background-color: transparent; border: 0; margin-right: var(--outer-padding); }
+header .ticket-icon .material-symbols-outlined { font-size: 32px; color: var(--default); }
 button { padding: var(--inner-padding); border-radius: var(--border-radius); background-color: var(--button); border-color: var(--select); font-weight: 500; 
     min-width: 150px; color: var(--description); }
 button.disabled { background-color: var(--button-disabled); border-color: transparent; color: #bbbbbb; }
@@ -227,6 +230,8 @@ span:before { content:''; position:absolute; width:16px; height:16px; border-rad
     .object { border-radius: 0; }
     .object.medium { width: 100%; }
     h1.larger { font-size: 18px; }
+    header .ticket-icon { margin-right: var(--inner-padding); width: 52px; min-width: 52px; }
+    header .ticket-icon .material-symbols-outlined { font-size: 24px; }
 }
 @media (min-width: 1020px) { 
     .container { padding: 0 var(--outer-padding)  calc(var(--outer-padding) * 2) var(--outer-padding); }
@@ -235,7 +240,7 @@ span:before { content:''; position:absolute; width:16px; height:16px; border-rad
     #click-out { width: 0; min-width: 0; }
 }
 @media (hover:hover) {
-    header .icon-box:hover { background-color: var(--hover); }
+    header .icon-box:hover, header .ticket-icon:hover { background-color: var(--hover); }
     button:hover { background-color: var(--button-hover); cursor: pointer; }
     button.disabled:hover { cursor: default; background-color: var(--button-disabled); }
     .checkbox:hover { background-color: transparent; color: var(--description); }

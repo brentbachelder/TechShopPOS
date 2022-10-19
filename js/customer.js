@@ -88,7 +88,7 @@ function UpdateCustomerInput(id, required = false) {
 function DrawCustomerTickets() {
     var content = '<div style="padding: var(--inner-padding); text-align: center;">(no tickets)</div>';
 
-    if(Object.keys(CurrentCustomer.Tickets).length > 0) {
+    if('Tickets' in CurrentCustomer && Object.keys(CurrentCustomer.Tickets).length > 0) {
         content = '';
         for(var key in CurrentCustomer.Tickets) {
             content += `<a href="#ticket-${key}" class="customer-ticket-container">
@@ -113,14 +113,16 @@ function DrawCustomerInvoices() {
             var date = CurrentInvoices[key].FullDate.toString();
             var datePrinted = date.substring(4,6) + "/" + date.substring(6, 8) + "/" + date.substring(2,4);
             var note = '';
-            if("Note" in CurrentInvoices[key] && CurrentInvoices[key].Note != '') note = `&nbsp;&nbsp(${CurrentInvoices[key].Note})`
+            if("Note" in CurrentInvoices[key] && CurrentInvoices[key].Note != '') note = `&nbsp;&nbsp(${CurrentInvoices[key].Note})`;
+            var ticket = `<div class="customer-invoice-link"></div>`;
+            if('Ticket' in CurrentInvoices[key]) ticket = `<a href="#ticket-${CurrentInvoices[key].Ticket}" class="customer-invoice-link">#${CurrentInvoices[key].Ticket}</a>`;
             
             content += `
                 <div style="display: flex; width: 100%; align-items:center; padding: var(--inner-padding) calc(100% / 20); gap: calc(100% / 20); color: var(--default);">
                     <div style="width: 24px;" class="material-symbols-outlined">${type}</div>
                     <div style="width: 84px; text-align: center;">${datePrinted}</div>
                     <div style="width: 80px; flex-grow: 1;"><b>$${CurrentInvoices[key].Amount.toFixed(2)}</b>${note}</div>
-                    <a href="#ticket-${CurrentInvoices[key].Ticket}" class="customer-invoice-link">#${CurrentInvoices[key].Ticket}</a>
+                    ${ticket}
                 </div>
             `;
         }
@@ -130,7 +132,8 @@ function DrawCustomerInvoices() {
 }
 
 function DrawCustomerSalesSummary() {
-    var tickets = Object.keys(CurrentCustomer.Tickets).length;
+    var tickets = 0;
+    if('Tickets' in CurrentCustomer) tickets = Object.keys(CurrentCustomer.Tickets).length;
     var sales = 0;
     if(CurrentInvoices != null) {
         for(var key in CurrentInvoices) sales += CurrentInvoices[key].Amount;
@@ -296,4 +299,5 @@ function DrawCustomer() {
     
     `;
     $("#frame").html(content);
+    pageLoading = false;
 }

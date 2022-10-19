@@ -248,4 +248,5 @@ function DrawPartOrders() {
         </div>
     `;
     $("#frame").html(content);
+    pageLoading = false;
 }

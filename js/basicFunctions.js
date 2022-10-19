@@ -3,6 +3,7 @@ var currentPage;
 const pageList = ["new-repair", "open-tickets", "reports", "pos", "part-orders", "settings-general", "settings-customers", "settings-tickets", "settings-dual"];
 const menu = document.getElementById("menu");
 const customerRatingColor = ['', 'red', 'lightcoral', 'gray', 'lightgreen', 'green'];
+var pageLoading = false;
 
 
 // Listener for page changes
@@ -28,7 +29,8 @@ function ClickFunctions(event) {
 // Actual Page Change function
 function ChangePage(newPage) {
     if(finishedLoading) {
-        if(newPage != currentPage) {
+        if(newPage != currentPage && !pageLoading) {
+            pageLoading = true;
             CloseMenu();
             ShowLoading();
 
@@ -177,9 +179,9 @@ function OnEnterBlur(event) {
 
 
 // Get Repair Description (Brand Model - Repair, Repair)
-function GetRepairDescription(ticketObject) {
+function GetRepairDescription(ticketObject, justRepairs = false) {
     var description = ticketObject.Device + ' ' + ticketObject.Type + ' - ';
-
+    if(justRepairs) description = '';
     var line = '';
     if('Repairs' in ticketObject) {
         var length = Object.keys(ticketObject.Repairs).length;
@@ -297,12 +299,6 @@ function ApplyStatusChange(ticket, status, customer) {
         DrawIndividualOpenTickets(ticketsInProgress);
     }
 }
-
-/*function CompleteTicket(ticket) {
-    db.ref('Tickets/' + ticket).update({Status: "Completed"});
-    db.ref('OpenTickets/' + ticket).remove();
-    AddTicketToRecentlyCompleted(ticket);
-}*/
 
 function AddTicketToRecentlyCompleted(ticket, customer) {
     var date = parseInt(DateConvert(true));
