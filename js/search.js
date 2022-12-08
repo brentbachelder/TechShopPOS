@@ -85,7 +85,6 @@ function CreateCustomerList(list) {
 // Set and Clear the selected search option
 function SetSearchSelection(num) {
     searchSelection = num;
-    console.log(searchSelection);
     ClearSearchSelection();
     if(num < customerShown.length && num >= 0) document.getElementById("ss-" + num).classList.add("selected");
 }

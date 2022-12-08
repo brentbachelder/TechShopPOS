@@ -10,8 +10,8 @@ body.dark-theme { background-image: linear-gradient(to bottom right, #000000, rg
 a { color: inherit; text-decoration: none; }
 input[type='text'] { border: 0; background-color: transparent; width: 100%;  }
 input[type='text']:focus, textarea:focus { color: var(--default); outline: none; }
-input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-input[type=number] { border: 0; outline: none; width: 100%; -moz-appearance: textfield; }
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { appearance: none; margin: 0; }
+input[type=number] { border: 0; outline: none; width: 100%; appearance: none; }
 
 
 
@@ -78,7 +78,7 @@ menu { width: var(--menu-size); min-width: var(--menu-size); background-color: v
 
 /*  Icons   */
 .icon-container { height: 100%; display: flex; align-items: center; }
-.icon-box { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+.icon-box { width: 80px; min-width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; background-color: transparent; }
 .icon-box.mobile { width: var(--mobile-menu-height); height: var(--mobile-menu-height); }
 .icon-box .material-symbols-outlined { font-size: 26px; color: var(--menu-font); }
 .icon-box .material-symbols-outlined.mobile { font-size: 20px; }

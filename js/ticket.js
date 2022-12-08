@@ -263,7 +263,10 @@ function TicketAddPayment() {
             <div style="font-size: 12px; font-weight: 700; padding-right: var(--inner-padding);">NOTE</div>
             <input id="reference-note" class="reference-input" placeholder=" ">
         </div>
-        <div style="width: 100%; text-align: center; margin-top: var(--outer-padding);">
+        <div class="checkbox-container" style="font-size:14px; font-weight: 700; margin-top: var(--outer-padding);">COMPLETE TICKET
+            <button id="complete-ticket" class="checkbox material-symbols-outlined selected" style="margin-left: var(--inner-padding)" onclick="CheckboxToggle(this)"></button>
+        </div>
+        <div style="width: 100%; text-align: center; margin-top: var(--inner-padding);">
             <button id="other-apply-button" onclick="SubmitTicketAddPayment()">Apply</button>
         </div>
     `;
@@ -308,10 +311,13 @@ function SubmitTicketAddPayment() {
         else CurrentTicket['Invoices'] = { [Admin.CurrentInvoiceNumber] : invoiceDate };
         AddInvoiceToRecent(Admin.CurrentInvoiceNumber);
         db.ref("Admin/CurrentInvoiceNumber").set(Admin.CurrentInvoiceNumber + 1);
+        if(document.getElementById("complete-ticket").classList.contains("selected")) {
+            ApplyStatusChange(ticketNumber, 'Completed', CurrentTicket.Customer);
+            document.getElementById(ticketNumber + "-dropdown").value = 'Completed';
+        }
         ClosePopup();
         DrawTicketPaymentSummary();
         DrawTicketInvoices();
-        console.log(CurrentTicket);
     }
     else {
         document.getElementById("add-repair-payment-container").classList.add("error");
@@ -461,30 +467,34 @@ async function DrawTicketInvoices() {
 
     if(Object.keys(CurrentInvoices).length > 0) {
         content = '';
-        for(var key in CurrentInvoices) {
-            var type = 'shopping_bag';
-            if(CurrentInvoices[key].Type == "Card") type = 'credit_card';
-            else if(CurrentInvoices[key].Type == "Cash") type = 'payments';
-            var date = CurrentInvoices[key].FullDate.toString();
-            var datePrinted = date.substring(4,6) + "/" + date.substring(6, 8) + "/" + date.substring(2,4);
-            var color = 'var(--default)';
-            var refund = `<div id="refund-${key}" class="invoice-refund-text" onclick="RefundInvoice(${key},${CurrentInvoices[key].FullDate.toString()})">Refund</div>`;
-            if(CurrentInvoices[key].Refunded && CurrentInvoices[key].Amount >= 0) {
-                refund = `<div style="font-size: 10px; text-align: right; color: darkred;">REFUNDED</div>`;
+        var sorted = GetDescending(CurrentInvoices);
+        for(var outer in sorted) {
+            for(var key in sorted[outer]) {
+                var type = 'shopping_bag';
+                if(CurrentInvoices[key].Type == "Card") type = 'credit_card';
+                else if(CurrentInvoices[key].Type == "Cash") type = 'payments';
+                var date = CurrentInvoices[key].FullDate.toString();
+                var datePrinted = date.substring(4,6) + "/" + date.substring(6, 8) + "/" + date.substring(2,4);
+                var color = 'var(--default)';
+                var refund = `<div id="refund-${key}" class="invoice-refund-text" onclick="RefundInvoice(${key},${CurrentInvoices[key].FullDate.toString()})">Refund</div>`;
+                if(CurrentInvoices[key].Refunded && CurrentInvoices[key].Amount >= 0) {
+                    refund = `<div style="font-size: 10px; text-align: right; color: darkred;">REFUNDED</div>`;
+                }
+                else if(CurrentInvoices[key].Refunded && CurrentInvoices[key].Amount < 0) {
+                    refund = '';
+                    color = 'darkred';
+                }
+                
+                content += `
+                    <div style="display: flex; width: 100%; align-items:center; padding: var(--inner-padding) calc(100% / 20); gap: calc(100% / 20); color: ${color};">
+                        <div onclick="PrintTicket(${ticketNumber}, 'Invoice', ${key})" class="material-symbols-outlined print-invoice" tabindex="0">print</div>
+                        <div style="width: 24px;" class="material-symbols-outlined">${type}</div>
+                        <div style="width: 84px; text-align: center;">${datePrinted}</div>
+                        <div style="width: 80px; font-weight: 700; flex-grow: 1;">$${CurrentInvoices[key].Amount.toFixed(2)}</div>
+                        ${refund}
+                    </div>
+                `;
             }
-            else if(CurrentInvoices[key].Refunded && CurrentInvoices[key].Amount < 0) {
-                refund = '';
-                color = 'darkred';
-            }
-            
-            content += `
-                <div style="display: flex; width: 100%; align-items:center; padding: var(--inner-padding) calc(100% / 20); gap: calc(100% / 20); color: ${color};">
-                    <div style="width: 24px;" class="material-symbols-outlined">${type}</div>
-                    <div style="width: 84px; text-align: center;">${datePrinted}</div>
-                    <div style="width: 80px; font-weight: 700; flex-grow: 1;">$${CurrentInvoices[key].Amount.toFixed(2)}</div>
-                    ${refund}
-                </div>
-            `;
         }
     }
 
@@ -518,7 +528,8 @@ function DrawTicketPaymentSummary() {
         document.getElementById("payment-summary-header").classList.add("red");
     }
     else {
-        document.getElementById("payment-summary-header").innerHTML = '<h1>PAYMENT SUMMARY</h1>';
+        document.getElementById("payment-summary-header").innerHTML = `<h1>PAYMENT SUMMARY</h1>
+            <button class="icon-box" onclick="PrintTicket(${ticketNumber}, 'Receipt')"><div class="material-symbols-outlined">print</div></button>`;
         document.getElementById("payment-summary-header").classList.remove("red");
         document.getElementById("payment-summary-header").classList.add("green");
     }
@@ -748,8 +759,7 @@ function DrawTicket() {
                 </div>
                 <div class="object medium">
                     <header class="yellow">
-                        <h1>INVOICES</h1>
-                        <button class="icon-box" onclick="PrintTicket(${ticketNumber}, 'Receipt')"><div class="material-symbols-outlined">print</div></button>
+                        <h1 style="justify-content: center;">INVOICES</h1>
                     </header>
                     <div id="ticket-invoices-container""></div>
                 </div>
@@ -762,6 +772,6 @@ function DrawTicket() {
         <div id="popup-container"></div>
     </div>
     `;
-    $("#frame").html(content);
+    document.getElementById("frame").innerHTML = content;
     pageLoading = false;
 }

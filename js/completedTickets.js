@@ -42,7 +42,6 @@ function RetrieveCompleted(page) {
             }
         }
     }
-    console.log("Count is " + count);
     if(count <= 20 * page) nextPage = false;
     
     DrawCompletedTickets(page, nextPage);
@@ -77,6 +76,6 @@ function DrawCompletedTickets(page, anotherPage = false) {
         </div>
     </div>
     `;
-    $("#frame").html(content);
+    document.getElementById("frame").innerHTML = content;
     pageLoading = false;
 }

@@ -136,7 +136,7 @@ function GetDashboardDropdowns() {
         <div class="selectdiv" style="margin:0"><label><select onchange="chartType = this.value; UpdateDashboardChart()">
             <option value="All Types"${selected}>All Types</option>`;
     for(var i = 0; i < typeList.length; i++) {
-        if(chartType == typeList[i]) { selected = ' selected'; console.log("Got one"); }
+        if(chartType == typeList[i]) selected = ' selected';
         else selected = '';
         content += `<option value="${typeList[i]}"${selected}>${typeList[i]}</option>`;
     }
@@ -298,6 +298,6 @@ function DrawDashboard() {
         </div>
     </div>
     `;
-    $("#frame").html(content);
+    document.getElementById("frame").innerHTML = content;
     pageLoading = false;
 }
