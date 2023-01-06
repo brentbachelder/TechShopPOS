@@ -273,7 +273,7 @@ function DrawNewCustomerInputs() {
                         <div class="miniput">
                             <div id="${dashed}-miniput" class="miniput-description">${display}</div>
                             <input type="text" id="${dashed}" placeholder="${display}${requiredStar}"${nameSearchActions} onfocus="FocusCustomerInput(this.id)"
-                                onkeyup="SaveToTemporaryInput('${dashed}')"${required}>
+                                onkeyup="OnEnterBlur(event); SaveToTemporaryInput('${dashed}')"${required}>
                         </div>
                         <div class="x-input" onmousedown="ClearNewTicketInput('${dashed}')"><div class="material-symbols-outlined">close</div></div>
                     </div>
@@ -494,7 +494,7 @@ function DrawNewRepair() {
         </div>
     
     `;
-    $("#frame").html(content);
+    document.getElementById("frame").innerHTML = content;
     pageLoading = false;
 }
 

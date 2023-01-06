@@ -25,7 +25,7 @@ function AddToPOS() {
         if(document.getElementById("pos-tax-checkbox").classList.contains("selected")) tax = true;
         var key = Object.keys(posRepairs).length;
 
-        posRepairs[key] = {"Display" : display, "DiscountDollar" : 0, "DiscountPercent" : 0, "Price" : price, "Quantity" : quantity, "Tax" : tax };
+        posRepairs[key] = {"Display" : display, "DiscountDollar" : 0, "DiscountPercent" : 0, "Price" : price, "Quantity" : parseInt(quantity), "Tax" : tax };
         document.getElementById("pos-item-input").value = '';
         document.getElementById("pos-item-input-price").value = '0.00';
         document.getElementById("pos-item-input-quantity").value = '1';
@@ -235,8 +235,14 @@ function DrawPOSPaymentSummary() {
         document.getElementById("payment-summary-header").classList.remove("green");
         document.getElementById("payment-summary-header").classList.add("red");
     }
+    else if(Object.keys(posInvoices).length > 0) {
+        document.getElementById("payment-summary-header").innerHTML = `<h1>PAYMENT SUMMARY</h1>
+            <button class="icon-box" onclick="PrintPOSReceipt()"><div class="material-symbols-outlined">print</div></button>`;
+        document.getElementById("payment-summary-header").classList.remove("red");
+        document.getElementById("payment-summary-header").classList.add("green");
+    }
     else {
-        document.getElementById("payment-summary-header").innerHTML = '<h1>PAYMENT SUMMARY</h1>';
+        document.getElementById("payment-summary-header").innerHTML = `<h1>PAYMENT SUMMARY</h1>`;
         document.getElementById("payment-summary-header").classList.remove("red");
         document.getElementById("payment-summary-header").classList.add("green");
     }
@@ -379,6 +385,6 @@ function DrawPOS() {
         <div id="popup-container"></div>
     </div>
     `;
-    $("#frame").html(content);
+    document.getElementById("frame").innerHTML = content;
     pageLoading = false;
 }

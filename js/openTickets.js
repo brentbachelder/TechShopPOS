@@ -93,6 +93,6 @@ function DrawOpenTickets() {
             </div>
         </div>
     `;
-    $("#frame").html(content);
+    document.getElementById("frame").innerHTML = content;
     pageLoading = false;
 }

@@ -4,6 +4,7 @@ const pageList = ["new-repair", "open-tickets", "reports", "pos", "part-orders",
 const menu = document.getElementById("menu");
 const customerRatingColor = ['', 'red', 'lightcoral', 'gray', 'lightgreen', 'green'];
 var pageLoading = false;
+var readyToPrint = true;
 
 
 // Listener for page changes
@@ -23,6 +24,7 @@ function ClickFunctions(event) {
     var dic = document.getElementById('dropdown-icon-container');
     if(!dic.classList.contains('hidden') && !document.getElementById('dropdown-dots').contains(event.target)) dic.classList.add('hidden');
 }
+
 
 
 
@@ -172,8 +174,19 @@ function CheckboxToggle(element, fromNewTicket = false) {
 
 // Enter key blurs input
 function OnEnterBlur(event) {
+    var id = event.target.id;
     var key = event.keyCode;
     if(key == 13) document.activeElement.blur();
+    if((id.includes("Phone") || id.includes("Phone")) && key != 8 && key != 46) {
+        var value = event.target.value;
+        value = value.replace(/-/g, '');
+    
+        if(value.length > 3 && value.length <= 6) 
+            value = value.slice(0,3) + "-" + value.slice(3);
+        else if(value.length > 6) 
+            value = value.slice(0,3) + "-" + value.slice(3,6) + "-" + value.slice(6);
+        event.target.value = value;
+    }
 }
 
 
@@ -260,11 +273,25 @@ function DateToText(date) {
     return description;
 }
 
+function SimpleDateToText(date) {
+    date = date.toString();
+    var newDate = new Date(parseInt(date.substring(0,4)), parseInt(date.substring(4,6)) - 1, parseInt(date.substring(6,8)));
+    var daysOfTheWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    var weekDay = newDate.getDay();
+    var ampm = "AM";
+    var hour = parseInt(date.substring(8,10));
+    if(hour >= 12) ampm = "PM"
+    if(hour > 12) hour -= 12;
+    var returnString= daysOfTheWeek[weekDay] + " " + date.substring(4,6) + "-" + date.substring(6,8) + "-" + date.substring(2,4) + " " + hour + ":" + 
+        date.substring(10,12) + " " + ampm;
+    return returnString;
+}
+
 
 
 // Create Dropdowns and Apply Status Changes
 function StatusDropdown(ticket, current, customer) {
-    var content = `<div class="selectdiv"><label><select onchange="ApplyStatusChange(${ticket}, this.value, ${customer})">`;
+    var content = `<div class="selectdiv"><label><select id="${ticket}-dropdown" onchange="ApplyStatusChange(${ticket}, this.value, ${customer})">`;
     for(var key in Settings.Tickets.Status) {
         var display = Settings.Tickets.Status[key].Display;
         var select = '';

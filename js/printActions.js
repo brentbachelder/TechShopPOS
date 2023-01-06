@@ -1,9 +1,16 @@
-function GetPrintPaymentStatus() {
-    if(CurrentTicket.Balance == 0) return 'PAID - THANK YOU';
-    else return '- NOT PAID -';
+function GetPrintPaymentStatus(ticketType, invoiceNum = -1) {
+    if(ticketType == "Receipt") {
+        if(CurrentTicket.Balance == 0) return 'PAID - THANK YOU';
+        else return '- NOT PAID -';
+    }
+    else if(ticketType == "Invoice") {
+        if(CurrentInvoices[invoiceNum].Amount < 0) return 'REFUNDED';
+        else return 'APPROVED - THANK YOU';
+    }
+    else if(ticketType == "POSReceipt") return 'PAID - THANK YOU';
 }
 
-function GetPrintPaymentSummary() {
+function GetPrintPaymentSummary(ticketType, invoiceNumber) {
     if('Repairs' in CurrentTicket) {
         var subTotal = 0, discounts = 0, tax = 0, total = 0;
         var taxRate = Settings.General.SalesTax / 100;
@@ -25,7 +32,7 @@ function GetPrintPaymentSummary() {
     `;
     content += GetPrintSmallSpace();
     
-    if(Object.keys(CurrentInvoices).length > 0) {
+    if(Object.keys(CurrentInvoices).length > 0 && ticketType != "Invoice") {
         var cardPayments = 0, cashPayments = 0, otherPayments = 0;
         for(var key in CurrentInvoices) {
             var type = 'shopping_bag';
@@ -33,21 +40,33 @@ function GetPrintPaymentSummary() {
             else if(CurrentInvoices[key].Type == "Cash") cashPayments += CurrentInvoices[key].Amount;
             else otherPayments += CurrentInvoices[key].Amount;
         }
-    }
-    var totalPaid = cardPayments + cashPayments + otherPayments;
-    if(isNaN(totalPaid) || totalPaid == undefined) totalPaid = 0;
-    var cardText = '';
-    if(cardPayments > 0) cardText = `Card Payment: $${cardPayments.toFixed(2)}<br />`;
-    var cashText = '';
-    if(cashPayments > 0) cashText = `Cash Payment: $${cashPayments.toFixed(2)}<br />`;
-    var otherText = '';
-    if(otherPayments > 0) otherText = `Other Payment: $${otherPayments.toFixed(2)}<br />`;
-    content += `
-        <div style="width: 100%; text-align: right; font-size: 10pt; font-weight: 500; line-height: 14pt;">
-            ${cardText}${cashText}${otherText}<b>Total Payment: $${totalPaid}</b>
-        </div>
-    `;
 
+        var totalPaid = cardPayments + cashPayments + otherPayments;
+        if(isNaN(totalPaid) || totalPaid == undefined) totalPaid = 0;
+        var cardText = '';
+        if(cardPayments > 0) cardText = `Card Payment: $${cardPayments.toFixed(2)}<br />`;
+        var cashText = '';
+        if(cashPayments > 0) cashText = `Cash Payment: $${cashPayments.toFixed(2)}<br />`;
+        var otherText = '';
+        if(otherPayments > 0) otherText = `Other Payment: $${otherPayments.toFixed(2)}<br />`;
+        content += `
+            <div style="width: 100%; text-align: right; font-size: 10pt; font-weight: 500; line-height: 14pt;">
+                ${cardText}${cashText}${otherText}<b>Total Payment: $${totalPaid}</b>
+            </div>
+        `;
+    }
+    if(ticketType == "Invoice") {
+        var paymentDate = SimpleDateToText(CurrentInvoices[invoiceNumber].FullDate);
+        var paymentText = `${paymentDate}<br />`;
+        if(CurrentInvoices[invoiceNumber].Amount < 0) paymentText = `Refunded: ${paymentDate}<br />`;
+        content += `
+            <div style="width: 100%; text-align: right; font-size: 10pt; font-weight: 500; line-height: 14pt;">
+                Payment Method: ${CurrentInvoices[invoiceNumber].Type}<br />
+                ${paymentText}<b>Amount: $${CurrentInvoices[invoiceNumber].Amount}</b>
+            </div>
+        `;
+    }
+    
     return content;
 }
 
@@ -108,10 +127,6 @@ function GetPrintStoreInfo() {
         ${Settings.General.BusinessCity}, ${Settings.General.BusinessState} ${Settings.General.BusinessZip}`;
 }
 
-function GetPrintDate() {
-    return "Thu 10-06-22 11:09 AM";
-}
-
 function GetPrintBigSpace() {
     return '<div style="height: 34px;"></div>';
 }
@@ -138,52 +153,162 @@ function OptionsToText(options, content) {
     return `<div style='${textAlign} font-size: ${size.toString()}pt; line-height: ${(size + 4).toString()}pt; ${bold}${italic}'>${content}</div>`;
 }
 
-function PrintTicket(ticketNum, ticketType) {
-    var customerContent = '';
-    if(ticketType == "Receipt") {
-        customerContent += '<div style="text-align: center; font-size: 14pt; line-height: 18pt; font-weight: 500;">RECEIPT</div>';
-        customerContent += GetPrintSmallSpace();
-    }
-    for(var key in Settings.Printing[ticketType]) {
-        var value = Settings.Printing[ticketType][key];
-        var display = value.split('-')[0];
-        var options = value.split('-')[1];
-        var inner = '';
+async function PrintTicket(ticketNum, ticketType, invoiceNumber = -1) {
+    if(readyToPrint) {
+        readyToPrint = false;
+        await db.ref("Tickets/" + ticketNum).once('value').then(snap => {
+            CurrentTicket = snap.val();
+        });
+        console.log(CurrentTicket);
+        await db.ref("Customers/" + CurrentTicket.Customer).once('value').then(snap => {
+            CurrentCustomer = snap.val();
+        });
 
-        if(display == 'BigSpace') customerContent += GetPrintBigSpace();
-        else if(display == 'SmallSpace') customerContent += GetPrintSmallSpace();
-        else if(display == 'Repairs') customerContent += GetPrintRepairs();
-        else if(display == 'PaymentSummary') customerContent += GetPrintPaymentSummary();
-        else {
-            if(display == 'TicketNumber') inner = '#' + ticketNum;
-            else if(display == 'StoreName') inner = Settings.General.BusinessName;
-            else if(display == 'StoreInfo') inner = GetPrintStoreInfo();
-            else if(display == 'Date') inner = GetPrintDate();
-            else if(display == 'CustomerName') inner = CurrentCustomer.Name;
-            else if(display == 'CustomerInfo' && ticketType != "Receipt") inner = GetPrintCustomerInfo();
-            else if(display == 'CustomerInfo' && ticketType == "Receipt") inner = CurrentCustomer.Phone;
-            else if(display == 'RepairSummary') inner = "Repair Summary";
-            else if(display == 'DeviceType') inner = CurrentTicket.Device + " " + CurrentTicket.Type + " - " + CurrentTicket.Color;
-            else if(display == 'RepairDescription') inner = GetRepairDescription(CurrentTicket, true);
-            else if(display == 'TicketInfo') inner = GetPrintTicketInfo();
-            else if(display == 'Disclaimer') inner = Settings.General.WarrantyDisclaimer;
-            else if(display =='PaymentStatus') inner = GetPrintPaymentStatus();
-            customerContent += OptionsToText(options, inner);
+        var customerContent = '';
+        if(ticketType == "Receipt") {
+            customerContent += '<div style="text-align: center; font-size: 14pt; line-height: 18pt; font-weight: 500;">RECEIPT</div>';
+            customerContent += GetPrintSmallSpace();
         }
-    }
-    customerContent += GetPrintBigSpace();
-    customerContent += '<hr>';
+        else if(ticketType == "Invoice") {
+            customerContent += `<div style="text-align: center; font-size: 14pt; line-height: 18pt; font-weight: 500;">INVOICE #${invoiceNumber}</div>`;
+            customerContent += GetPrintSmallSpace();
+        }
+        for(var key in Settings.Printing[ticketType]) {
+            var value = Settings.Printing[ticketType][key];
+            var display = value.split('-')[0];
+            var options = value.split('-')[1];
+            var inner = '';
 
-    var content = `
-        <div class="receipt-printer">
-            ${customerContent}
-        </div>
-    `;
-    SendToPrinter(content);    
+            if(display == 'BigSpace') customerContent += GetPrintBigSpace();
+            else if(display == 'SmallSpace') customerContent += GetPrintSmallSpace();
+            else if(display == 'Repairs') customerContent += GetPrintRepairs();
+            else if(display == 'PaymentSummary') customerContent += GetPrintPaymentSummary(ticketType, invoiceNumber);
+            else {
+                if(display == 'TicketNumber') inner = '#' + ticketNum;
+                else if(display == 'StoreName') inner = Settings.General.BusinessName;
+                else if(display == 'StoreInfo') inner = GetPrintStoreInfo();
+                else if(display == 'Date') inner = SimpleDateToText(CurrentTicket.DateCreated);
+                else if(display == 'CustomerName') inner = CurrentCustomer.Name;
+                else if(display == 'CustomerInfo' && ticketType != "Receipt" && ticketType != "Invoice") inner = GetPrintCustomerInfo();
+                else if(display == 'CustomerInfo' && (ticketType == "Receipt" || ticketType == "Invoice")) inner = CurrentCustomer.Phone;
+                else if(display == 'RepairSummary') inner = "Repair Summary";
+                else if(display == 'DeviceType') inner = CurrentTicket.Device + " " + CurrentTicket.Type + " - " + CurrentTicket.Color;
+                else if(display == 'RepairDescription') inner = GetRepairDescription(CurrentTicket, true);
+                else if(display == 'TicketInfo') inner = GetPrintTicketInfo();
+                else if(display == 'Disclaimer') inner = Settings.General.WarrantyDisclaimer;
+                else if(display =='PaymentStatus') inner = GetPrintPaymentStatus(ticketType, invoiceNumber);
+                customerContent += OptionsToText(options, inner);
+            }
+        }
+        customerContent += GetPrintBigSpace();
+        customerContent += '<hr>';
+
+        var content = `
+            <div class="receipt-printer">
+                ${customerContent}
+            </div>
+        `;
+        SendToPrinter(content);
+    }
 }
 
-function PrintReceipt(ticketNum) {
-    console.log("Printing receipt for ticket #" + ticketNum);
+function PrintPOSReceipt() {
+    if(readyToPrint) {
+        readyToPrint = false;
+        var customerContent = '<div style="text-align: center; font-size: 14pt; line-height: 18pt; font-weight: 500;">RECEIPT</div>';
+        customerContent += GetPrintSmallSpace();
+        var todaysDate = DateConvert(true);
+
+        for(var key in Settings.Printing.Receipt) {
+            var value = Settings.Printing.Receipt[key];
+            var display = value.split('-')[0];
+            var options = value.split('-')[1];
+            var inner = '';
+
+            if(display == 'BigSpace') customerContent += GetPrintBigSpace();
+            else if(display == 'SmallSpace') customerContent += GetPrintSmallSpace();
+            else if(display == 'Repairs') {
+                var content = '<div class="print-repair-container"><div class="print-repair-desc">Description</div><div class="print-repair-qty">Qty</div><div class="print-repair-price">Price</div></div>';
+                content += '<hr style="width: 100%;">';
+                for(var key in posRepairs) {
+                    content += `
+                        <div class="print-repair-container">
+                            <div class="print-repair-desc">${posRepairs[key].Display}</div>
+                            <div class="print-repair-qty">${posRepairs[key].Quantity}</div>
+                            <div class="print-repair-price">$${posRepairs[key].Price.toFixed(2)}</div>
+                        </div>
+                    `;
+                }
+                customerContent += content;
+            }
+            else if(display == 'PaymentSummary') {
+                var content = '';
+                var subTotal = 0, discounts = 0, tax = 0, total = 0;
+                var taxRate = Settings.General.SalesTax / 100;
+                for(var key in posRepairs) {
+                    var currentSub = posRepairs[key].Price * parseInt(posRepairs[key].Quantity);
+                    subTotal += Math.round(currentSub * 100) / 100;
+                    var curDiscounts = posRepairs[key].DiscountDollar + (currentSub - posRepairs[key].DiscountDollar) * (posRepairs[key].DiscountPercent / 100);
+                    discounts += Math.round(curDiscounts * 100) / 100;
+                    if(posRepairs[key].Tax) tax += Math.round(((currentSub - curDiscounts) * taxRate) * 100) / 100;
+                }
+                total = subTotal + tax - discounts;
+                var discountText = '';
+                if(discounts > 0) discountText = `Discounts: $${discounts.toFixed(2)}<br />`;
+                var content = `
+                    <div style="width: 100%; text-align: right; font-size: 10pt; font-weight: 500; line-height: 14pt;">
+                        Subtotal: $${subTotal.toFixed(2)}<br />${discountText}Tax: $${tax.toFixed(2)}<br />Total: $${total.toFixed(2)}
+                    </div>
+                `;
+                content += GetPrintSmallSpace();
+                
+                if(Object.keys(posInvoices).length > 0) {
+                    var cardPayments = 0, cashPayments = 0, otherPayments = 0;
+                    for(var key in posInvoices) {
+                        var type = 'shopping_bag';
+                        if(posInvoices[key].Type == "Card") cardPayments += posInvoices[key].Amount
+                        else if(posInvoices[key].Type == "Cash") cashPayments += posInvoices[key].Amount;
+                        else otherPayments += posInvoices[key].Amount;
+                    }
+            
+                    var totalPaid = cardPayments + cashPayments + otherPayments;
+                    if(isNaN(totalPaid) || totalPaid == undefined) totalPaid = 0;
+                    var cardText = '';
+                    if(cardPayments > 0) cardText = `Card Payment: $${cardPayments.toFixed(2)}<br />`;
+                    var cashText = '';
+                    if(cashPayments > 0) cashText = `Cash Payment: $${cashPayments.toFixed(2)}<br />`;
+                    var otherText = '';
+                    if(otherPayments > 0) otherText = `Other Payment: $${otherPayments.toFixed(2)}<br />`;
+                    content += `
+                        <div style="width: 100%; text-align: right; font-size: 10pt; font-weight: 500; line-height: 14pt;">
+                            ${cardText}${cashText}${otherText}<b>Total Payment: $${totalPaid}</b>
+                        </div>
+                    `;
+                }
+                
+                customerContent += content;
+            }
+            else {
+                if(display == 'StoreName') inner = Settings.General.BusinessName;
+                else if(display == 'StoreInfo') inner = GetPrintStoreInfo();
+                else if(display == 'Date') inner = SimpleDateToText(todaysDate);
+                else if(display == 'CustomerName') inner = 'Register';
+                else if(display == 'RepairSummary') inner = "Repair Summary";
+                else if(display == 'Disclaimer') inner = Settings.General.WarrantyDisclaimer;
+                else if(display =='PaymentStatus') inner = GetPrintPaymentStatus('POSReceipt');
+                customerContent += OptionsToText(options, inner);
+            }
+        }
+        customerContent += GetPrintBigSpace();
+        customerContent += '<hr>';
+
+        var content = `
+            <div class="receipt-printer">
+                ${customerContent}
+            </div>
+        `;
+        SendToPrinter(content);
+    }
 }
 
 function PrintPDF() {
@@ -222,6 +347,7 @@ function SendToPrinter(contents) {
         window.frames["frame1"].focus();
         window.frames["frame1"].print();
         document.body.removeChild(frame1);
+        readyToPrint = true;
     }, 500);
     return false;
 }

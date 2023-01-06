@@ -156,6 +156,6 @@ function DrawCustomInvoices(start, end, totalSales) {
         </div>
     </div>
     `;
-    $("#frame").html(content);
+    document.getElementById("frame").innerHTML = content;
     pageLoading = false;
 }

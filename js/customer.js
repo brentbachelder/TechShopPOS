@@ -90,11 +90,14 @@ function DrawCustomerTickets() {
 
     if('Tickets' in CurrentCustomer && Object.keys(CurrentCustomer.Tickets).length > 0) {
         content = '';
-        for(var key in CurrentCustomer.Tickets) {
-            content += `<a href="#ticket-${key}" class="customer-ticket-container">
-                <div class="customer-ticket-link">#${key}</div>
-                <div style="flex-grow: 1">${CurrentCustomer.Tickets[key]}</div>
-            </a>`;
+        var sorted = GetDescending(CurrentCustomer.Tickets);
+        for(var outer in sorted) {
+            for(var key in sorted[outer]) {
+                content += `<a href="#ticket-${key}" class="customer-ticket-container">
+                    <div class="customer-ticket-link">#${key}</div>
+                    <div style="flex-grow: 1">${CurrentCustomer.Tickets[key]}</div>
+                </a>`;
+            }
         }
     }
 
@@ -106,25 +109,29 @@ function DrawCustomerInvoices() {
 
     if(Object.keys(CurrentInvoices).length > 0) {
         content = '';
-        for(var key in CurrentInvoices) {
-            var type = 'shopping_bag';
-            if(CurrentInvoices[key].Type == "Card") type = 'credit_card';
-            else if(CurrentInvoices[key].Type == "Cash") type = 'payments';
-            var date = CurrentInvoices[key].FullDate.toString();
-            var datePrinted = date.substring(4,6) + "/" + date.substring(6, 8) + "/" + date.substring(2,4);
-            var note = '';
-            if("Note" in CurrentInvoices[key] && CurrentInvoices[key].Note != '') note = `&nbsp;&nbsp(${CurrentInvoices[key].Note})`;
-            var ticket = `<div class="customer-invoice-link"></div>`;
-            if('Ticket' in CurrentInvoices[key]) ticket = `<a href="#ticket-${CurrentInvoices[key].Ticket}" class="customer-invoice-link">#${CurrentInvoices[key].Ticket}</a>`;
-            
-            content += `
-                <div style="display: flex; width: 100%; align-items:center; padding: var(--inner-padding) calc(100% / 20); gap: calc(100% / 20); color: var(--default);">
-                    <div style="width: 24px;" class="material-symbols-outlined">${type}</div>
-                    <div style="width: 84px; text-align: center;">${datePrinted}</div>
-                    <div style="width: 80px; flex-grow: 1;"><b>$${CurrentInvoices[key].Amount.toFixed(2)}</b>${note}</div>
-                    ${ticket}
-                </div>
-            `;
+        var sorted = GetDescending(CurrentInvoices);
+        for(var outer in sorted) {
+            for(var key in sorted[outer]) {
+                var type = 'shopping_bag';
+                if(CurrentInvoices[key].Type == "Card") type = 'credit_card';
+                else if(CurrentInvoices[key].Type == "Cash") type = 'payments';
+                var date = CurrentInvoices[key].FullDate.toString();
+                var datePrinted = date.substring(4,6) + "/" + date.substring(6, 8) + "/" + date.substring(2,4);
+                var note = '';
+                if("Note" in CurrentInvoices[key] && CurrentInvoices[key].Note != '') note = `&nbsp;&nbsp(${CurrentInvoices[key].Note})`;
+                var ticket = `<div class="customer-invoice-link"></div>`;
+                if('Ticket' in CurrentInvoices[key]) ticket = `<a href="#ticket-${CurrentInvoices[key].Ticket}" class="customer-invoice-link">#${CurrentInvoices[key].Ticket}</a>`;
+                
+                content += `
+                    <div style="display: flex; width: 100%; align-items:center; padding: var(--inner-padding) calc(100% / 20); gap: calc(100% / 20); color: var(--default);">
+                        <div onclick="PrintTicket(${CurrentInvoices[key].Ticket}, 'Invoice', ${key})" class="material-symbols-outlined print-invoice" tabindex="0">print</div>
+                        <div style="width: 24px;" class="material-symbols-outlined">${type}</div>
+                        <div style="width: 84px; text-align: center;">${datePrinted}</div>
+                        <div style="width: 80px; flex-grow: 1;"><b>$${CurrentInvoices[key].Amount.toFixed(2)}</b>${note}</div>
+                        ${ticket}
+                    </div>
+                `;
+            }
         }
     }
 
@@ -298,6 +305,6 @@ function DrawCustomer() {
     </div>
     
     `;
-    $("#frame").html(content);
+    document.getElementById("frame").innerHTML = content;
     pageLoading = false;
 }
