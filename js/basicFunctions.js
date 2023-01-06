@@ -331,7 +331,6 @@ function AddTicketToRecentlyCompleted(ticket, customer) {
     var date = parseInt(DateConvert(true));
     var tickCust = ticket + '' + customer;
     var intTickCust = parseInt(tickCust);
-    console.log(tickCust);
     if('RecentlyCompletedTickets' in Admin) {
         if(Object.keys(Admin.RecentlyCompletedTickets).length < 100) db.ref('Admin/RecentlyCompletedTickets').update({[date] : intTickCust});
         else {
@@ -359,7 +358,6 @@ function AddInvoiceToRecent(invoiceNum) {
                 db.ref('Admin/RecentInvoices/' + key).remove();
                 db.ref('Admin/RecentInvoices').update({[date] : invoiceNum});
                 alreadyIn = true;
-                console.log("refunded");
             }
         }
         if(!alreadyIn) {

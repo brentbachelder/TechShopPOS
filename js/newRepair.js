@@ -71,7 +71,6 @@ function CheckCustomerInput() {
         else if(selectedType == '') document.getElementById("repair-information-error").innerHTML = '* Type Required';
         else document.getElementById("repair-information-error").innerHTML = '* Must Select at least 1 Repair';
     }
-    console.log("Error Count: " + errorCount);
     if(errorCount == 0) CreateNewTicket();
 }
 
@@ -154,7 +153,6 @@ function SubmitOtherRepair() {
         SaveToTemporaryDevice('Type', selectedType);
         selectedModelNumber = document.getElementById("other-model").value;
         SaveToTemporaryDevice('Model', selectedModelNumber);
-        console.log(selectedDevice + ", " + selectedType);
         document.getElementById("new-repair-summary").classList.remove("hidden");
         document.getElementById("input-repair-other").classList.add("hidden");
         document.getElementById("new-repair-summary").classList.remove("error");
@@ -544,7 +542,6 @@ async function CreateNewTicket() {
         else Customers = {[newTicketCustomer] : custInfo };
         Customers[newTicketCustomer]["Tickets"] = ticketObject;
     }
-    console.log(Customers[newTicketCustomer]);
 
     /* Repair Info */
     var balance = 0;
@@ -679,7 +676,6 @@ function RestoreTemporary() {
         if(TemporaryNewTicketDevice.Device != '' && TemporaryNewTicketDevice.Device != undefined) SelectDevice(TemporaryNewTicketDevice.Device);
         if(TemporaryNewTicketDevice.Type != '' && TemporaryNewTicketDevice.Type != undefined) {
             SelectType(TemporaryNewTicketDevice.Type);
-            console.log(TemporaryNewTicketRepairs.length);
             for(var i = 0; i < TemporaryNewTicketRepairs.length; i++) document.getElementById(TemporaryNewTicketRepairs[i]).classList.add("selected");
             SelectColor(TemporaryNewTicketDevice.Color);
             for(var j = 0; j < TemporaryNewTicketCheckboxes.length; j++) document.getElementById(TemporaryNewTicketCheckboxes[j]).classList.add("selected");

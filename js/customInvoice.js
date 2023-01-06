@@ -100,7 +100,6 @@ async function DrawDailyInvoices(year, month, day) {
 function DrawCustomInvoices(start, end, totalSales) {
     var todaysDate = DateConvert();
     var maxDate = todaysDate.substring(0,4) + "-" + todaysDate.substring(4,6) + "-" + todaysDate.substring(6,8);
-    console.log(end);
     var startDate = start.substring(0,4) + "-" + start.substring(4,6) + "-" + start.substring(6,8);
     var endDate = end.substring(0,4) + "-" + end.substring(4,6) + "-" + end.substring(6,8);
     var content = `

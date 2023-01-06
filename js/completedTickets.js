@@ -42,7 +42,6 @@ function RetrieveCompleted(page) {
             }
         }
     }
-    console.log("Count is " + count);
     if(count <= 20 * page) nextPage = false;
     
     DrawCompletedTickets(page, nextPage);
