@@ -1,4 +1,6 @@
 body { 
+    --page-background: linear-gradient(to bottom right, #2d3844, #9abd97);
+    
     --menu-hover: rgba(255, 255, 255, .08);
     --menu-select: rgba(255, 255, 255, .16);
     --menu-background: rgba(255,255,255, .1);
@@ -38,6 +40,8 @@ body {
 }
 
 body.dark-theme {
+    --page-background: linear-gradient(to bottom right, #444444, #2d3844);
+    
     --hover: rgba(255, 255, 255, .08);
     --select: #ffffff29;
     --background: #1e1e1e;
