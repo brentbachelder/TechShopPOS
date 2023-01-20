@@ -15,6 +15,7 @@ function InitDashboard() {
     UpdateDashboardChart();
     DrawCurrentStatus();
     DrawSecondScreenStatus();
+    if(!popupShown) setTimeout(DrawPopup, 500);
 }
 
 function CreateDashboardChart() {
@@ -300,4 +301,13 @@ function DrawDashboard() {
     `;
     document.getElementById("frame").innerHTML = content;
     pageLoading = false;
+}
+
+function DrawPopup() {
+    document.getElementById('intro-popup').classList.add('showing');
+    popupShown = true;
+}
+
+function CloseIntro() {
+    document.getElementById('intro-popup').classList.remove('showing');
 }

@@ -157,7 +157,8 @@ function GenerateTicket(day, month, year, dayNum) {
         Device : testDevice.slice(4), ModelNmbr : "", Network: "", NextRepairNumber : 1, Notes : { [date] : { Content : "Ticket Created", Type : "Tech Note" } }, 
         Password : "", Repairs : TestRepairs, Status : testStatus, 'Tempered Glass' : false, Type : testType.slice(4) };
 
-    TestCustomers[custNum]['Tickets'] = { [tickNum] : testDevice.slice(4) + " " + testType.slice(4)};
+    if(TestCustomers && TestCustomers[custNum])
+        TestCustomers[custNum]['Tickets'] = { [tickNum] : testDevice.slice(4) + " " + testType.slice(4)};
     tickNum++;
 }
 

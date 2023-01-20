@@ -8,6 +8,7 @@ var testModeComplete = false;
 
 // Object variables for database information
 var Customers = {}, CustomerSearch = {}, TicketSearch = [], OpenTickets = {}, Settings = {}, Admin = {}, Prices = {}, Parts = {};
+var popupShown = false;
 
 // Initialize the App
 async function InitializeApp() {
