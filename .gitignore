@@ -1,4 +1,8 @@
 node_modules
+.firebase
+.firebaserc
+firebase.json
+
 
 # My files
 Notes.txt
