@@ -5,7 +5,7 @@ Framework: *(none)*<br />
 Database: *Firebase*<br />
 
 ## Goal of the Project
-As a cell phone and computer repair shop owner, I was tired of paying high monthly prices for point-of-sale systems that had hundreds of bells and whistles that didn't apply to me. I wanted a POS system that could check-in a device in 30 seconds instead of five minutes. I wanted to be able to upload an Excel spreadsheet that would automatically update all the repair prices instead of having to go one-by-one in the system. I wanted a to be able to hook up any touch screen device, whether it be an iPad, an phone, or even an old touch monitor as a customer screen so they could approve repairs. I wanted sales figures, ticket counts, and device types to be accessible with one click of a button.
+As a cell phone and computer repair shop owner, I was tired of paying high monthly prices for point-of-sale systems that had hundreds of bells and whistles that didn't apply to me. I wanted a POS system that could check-in a device in 30 seconds instead of five minutes. I wanted to be able to upload an Excel spreadsheet that would automatically update all the repair prices instead of having to go one-by-one in the system. I wanted a to be able to hook up any touch screen device, whether it be an iPad, a phone, or even an old touch monitor as a customer screen so they could sign off on repairs. I wanted sales figures, ticket counts, and device types to be accessible with one click of a button.
 
 ## Usage
 The app is currently being used in the Alpha stage in two locations in Arizona.
