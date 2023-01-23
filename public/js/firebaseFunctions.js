@@ -1,5 +1,5 @@
 // Connect to Firebase & Firebase variables
-const firebaseConfig = { apiKey: "AIzaSyA2RDAkP6U-bivHEIauv6PsKKj9sMRFxqA",	authDomain: "brent-test-pos.firebaseapp.com", databaseURL: "https://brent-test-pos-default-rtdb.firebaseio.com", projectId: "brent-test-pos", storageBucket: "brent-test-pos.appspot.com", messagingSenderId: "775384518901", appId: "1:775384518901:web:f2994fed56d9d15c8135bc", measurementId: "G-DYCSZYQMHE" }; firebase.initializeApp(firebaseConfig);
+const firebaseConfig = { apiKey: "AIzaSyDOtLSWgGUh8RmwCeGbx1Dff0hOMXJjSZk", authDomain: "techshop-pos.firebaseapp.com", databaseURL: "https://techshop-pos-default-rtdb.firebaseio.com", projectId: "techshop-pos", storageBucket: "techshop-pos.appspot.com", messagingSenderId: "354861564177", appId: "1:354861564177:web:0c9d441a4976aeb46cccb0" }; firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 var finishedLoading = false;
 var postLoadingPage = "";
